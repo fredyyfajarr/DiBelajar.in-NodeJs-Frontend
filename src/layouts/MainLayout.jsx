@@ -97,8 +97,8 @@ const MainLayout = () => {
         )}
       </main>
 
-      {/* Footer - tidak ditampilkan di learning page dan student dashboard */}
-      {!isLearningPage && !isStudentDashboard && (
+      {/* Footer - tidak ditampilkan di learning page, student dashboard, admin, dan instructor pages */}
+      {!isLearningPage && !isStudentDashboard && !isPanelPage && (
         <div className="relative z-20">
           <Footer />
         </div>

@@ -11,8 +11,8 @@ import {
 import { useCategories } from '/src/hooks/useCategories.js'; // <-- Import hook kategori
 import useAuthStore from '/src/store/authStore.js';
 
-// Import Froala Editor
-import FroalaEditor from 'react-froala-wysiwyg';
+// Import TinyMCEEditor
+import TinyMCEEditor from '/src/components/TinyMCEEditor.jsx';
 
 const CourseFormModal = ({ isOpen, onClose, mode, currentCourse }) => {
   const {
@@ -131,14 +131,11 @@ const CourseFormModal = ({ isOpen, onClose, mode, currentCourse }) => {
               control={control}
               rules={{ required: 'Deskripsi wajib diisi' }}
               render={({ field: { onChange, value } }) => (
-                <FroalaEditor
-                  tag="textarea"
-                  model={value}
-                  onModelChange={onChange}
-                  config={{
-                    placeholderText: 'Tulis deskripsi kursus...',
-                    heightMin: 200,
-                  }}
+                <TinyMCEEditor
+                  value={value}
+                  onChange={onChange}
+                  placeholder="Tulis deskripsi kursus..."
+                  height={300}
                 />
               )}
             />

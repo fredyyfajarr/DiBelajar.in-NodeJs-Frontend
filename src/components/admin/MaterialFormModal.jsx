@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form'; // 1. Tambahkan 'useFieldArray'
 import Modal from '/src/components/Modal.jsx';
 import { useCreateMaterial, useUpdateMaterial } from '/src/hooks/useAdmin.js';
-import FroalaEditor from 'react-froala-wysiwyg';
+import TinyMCEEditor from '/src/components/TinyMCEEditor.jsx';
 
 // Komponen terpisah untuk mengelola Opsi Jawaban
 const OptionsArray = ({ control, nestIndex, register, getValues }) => {
@@ -168,14 +168,11 @@ const MaterialFormModal = ({
               control={control}
               rules={{ required: 'Deskripsi wajib diisi' }}
               render={({ field: { onChange, value } }) => (
-                <FroalaEditor
-                  tag="textarea"
-                  model={value}
-                  onModelChange={onChange}
-                  config={{
-                    placeholderText: 'Tulis deskripsi materi di sini...',
-                    heightMin: 200,
-                  }}
+                <TinyMCEEditor
+                  value={value}
+                  onChange={onChange}
+                  placeholder="Tulis deskripsi materi di sini..."
+                  height={300}
                 />
               )}
             />
