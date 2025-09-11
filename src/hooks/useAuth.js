@@ -29,8 +29,10 @@ export const useLogin = () => {
       navigate(destination);
     },
     onError: (error) => {
-      // Anda bisa menambahkan notifikasi error di sini
+      // Log error details untuk debugging
       console.error('Login failed:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
     },
   });
 };

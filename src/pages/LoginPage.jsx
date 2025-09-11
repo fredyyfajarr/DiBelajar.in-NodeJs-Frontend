@@ -15,6 +15,7 @@ const LoginPage = () => {
   const { openModal } = useModalStore();
 
   const onSubmit = (data) => {
+    console.log('Form data:', data);
     login(data);
   };
 

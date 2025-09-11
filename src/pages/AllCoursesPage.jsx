@@ -133,6 +133,57 @@ const AllCoursesPage = () => {
       </motion.div>
     );
 
+    const renderEmptyState = () => (
+      <motion.div
+        className="text-center py-20"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-12 border border-purple-100 shadow-2xl max-w-2xl mx-auto">
+          <motion.div
+            className="w-24 h-24 mx-auto mb-8 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ 
+              duration: 2, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+          >
+            <svg className="w-12 h-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </motion.div>
+          
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            Belum Ada Kursus
+          </h3>
+          
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            {category 
+              ? `Maaf, belum ada kursus yang tersedia untuk kategori "${categories.find(cat => cat.slug === category)?.name || category}" saat ini.`
+              : "Maaf, belum ada kursus yang tersedia saat ini. Silakan coba lagi nanti atau pilih kategori lain."
+            }
+          </p>
+          
+          <motion.button
+            onClick={() => handleCategoryChange('')}
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+            whileHover={{ y: -2, scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Lihat Semua Kursus
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+
 
   const renderContent = () => {
     if (isLoading && courses.length === 0) {
