@@ -2,7 +2,6 @@
 import axiosInstance from './axiosInstance.js';
 
 const login = (credentials) => {
-  console.log('Login attempt with credentials:', credentials);
   return axiosInstance.post('/auth/login', credentials);
 };
 

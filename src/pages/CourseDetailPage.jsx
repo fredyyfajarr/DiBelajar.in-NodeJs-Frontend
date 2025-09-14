@@ -59,8 +59,9 @@ const CourseDetailPage = () => {
   const materialsToShow = isAuthenticated ? materials : materials.slice(0, 3);
 
   const handleEnrollClick = () => {
-    console.log('Enrolling in course:', course?.slug || course?._id);
-    enroll(course?.slug || course?._id);
+    console.log('Enrolling in course:', course?._id || course?.slug);
+    console.log('Course data:', course);
+    enroll(course?._id || course?.slug);
   };
 
   return (

@@ -11,8 +11,16 @@ axiosInstance.interceptors.request.use(
     // Ambil token dari Zustand store
     const token = useAuthStore.getState().token;
     if (token) {
+      // Debug: Log token untuk memeriksa format
+      console.log('Token from store:', token);
+      console.log('Token starts with Bearer:', token.startsWith('Bearer '));
+      
       // Jika token ada, tambahkan ke header Authorization dengan format Bearer
-      config.headers['Authorization'] = `Bearer ${token}`;
+      // Periksa apakah token sudah memiliki prefix "Bearer "
+      const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      config.headers['Authorization'] = authHeader;
+      
+      console.log('Final Authorization header:', authHeader);
     }
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']; // biar browser set otomatis
@@ -33,13 +41,16 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Jika mendapat error 401 (Unauthorized) dan bukan dari endpoint login/register
+    // PERBAIKAN: Bagian ini dinonaktifkan untuk mencegah logout otomatis yang tidak diinginkan.
+    // Penanganan error 401 sekarang akan dikelola di tempat yang lebih spesifik (misalnya di dalam hook).
+    /*
     if (error.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
       const { logout } = useAuthStore.getState();
       logout();
       // Redirect ke halaman utama
       window.location.href = '/';
     }
+    */
     return Promise.reject(error);
   }
 );

@@ -92,11 +92,11 @@ const Navbar = () => {
       }
     },
     {
-      label: 'Profile',
+      label: 'Tentang',
       icon: User,
-      path: '/profile',
+      path: '/about',
       action: () => {
-        navigate('/profile');
+        navigate('/about');
         closeMenu();
       }
     },

@@ -184,6 +184,8 @@ const StudentDashboardPage = () => {
                         ? "Belum ada kursus yang diikuti. Mulai perjalanan belajar Anda sekarang!"
                         : `${totalCourses} kursus diikuti, ${completedCourses} telah selesai`
                       }
+                      {totalCourses > 0 && ongoingCourses.length > 0 && `, ${ongoingCourses.length} sedang dipelajari`}
+
                     </p>
                   </div>
                 </div>
@@ -245,6 +247,7 @@ const StudentDashboardPage = () => {
                           key={enrollment._id} 
                           enrollment={enrollment}
                           handleOpenReviewModal={handleOpenReviewModal}
+                          
                         />
                       ))}
                       {enrollments.length > 5 && (

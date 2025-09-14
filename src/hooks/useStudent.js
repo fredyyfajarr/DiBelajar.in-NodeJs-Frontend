@@ -11,12 +11,16 @@ export const useEnrollInCourse = () => {
   return useMutation({
     mutationFn: studentService.enrollInCourse,
     onSuccess: (data, courseId) => {
+      console.log('Enrollment successful:', data);
       toast.success('Selamat! Anda berhasil terdaftar di kursus ini.', {
         title: 'Pendaftaran Berhasil'
       });
       navigate('/student-dashboard');
     },
     onError: (error) => {
+      console.error('Enrollment error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error data:', error.response?.data);
       toast.error(error.response?.data?.error || 'Gagal mendaftar ke kursus.', {
         title: 'Pendaftaran Gagal'
       });

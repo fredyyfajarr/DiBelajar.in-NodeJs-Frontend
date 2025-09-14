@@ -15,7 +15,6 @@ const LoginPage = () => {
   const { openModal } = useModalStore();
 
   const onSubmit = (data) => {
-    console.log('Form data:', data);
     login(data);
   };
 
@@ -52,6 +51,7 @@ const LoginPage = () => {
           <input
             type="email"
             placeholder="Email"
+            autoComplete="email"
             className="w-full pl-10 pr-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             {...register('email', { required: 'Email wajib diisi' })}
           />
@@ -80,6 +80,7 @@ const LoginPage = () => {
           <input
             type="password"
             placeholder="Password"
+            autoComplete="current-password"
             className="w-full pl-10 pr-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             {...register('password', { required: 'Password wajib diisi' })}
           />
