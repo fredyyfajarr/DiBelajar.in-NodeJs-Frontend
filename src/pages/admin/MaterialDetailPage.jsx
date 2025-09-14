@@ -7,8 +7,11 @@ import {
   useMaterialDetail,
 } from '/src/hooks/useAdmin.js';
 import useAuthStore from '/src/store/authStore.js';
-import ForumModal from '/src/components/admin/ForumModal.jsx'; // Ganti jika path berbeda
+import ForumModal from '/src/components/ForumModal.jsx';
 import { MessageSquare, CheckSquare, FileText } from 'lucide-react';
+
+// Komponen-komponen list (SubmissionsList, TestResultsList, ForumPostsList) tidak perlu diubah.
+// Cukup salin dan tempel seperti yang ada di file Anda saat ini.
 
 const SubmissionsList = ({ data, isLoading }) => {
   if (isLoading)
@@ -34,7 +37,7 @@ const SubmissionsList = ({ data, isLoading }) => {
           submissions.map((sub) => (
             <tr
               key={sub._id}
-              className="border-b last:border-0 hover:bg-gray-50 transition-colors"
+              className="border-b last:border-0 hover:bg-gray-50 transition-colors duration-200"
             >
               <td className="p-3">{sub.userId?.name || 'N/A'}</td>
               <td className="p-3">
@@ -88,7 +91,7 @@ const TestResultsList = ({ data, isLoading }) => {
           results.map((res) => (
             <tr
               key={res._id}
-              className="border-b last:border-0 hover:bg-gray-50 transition-colors"
+              className="border-b last:border-0 hover:bg-gray-50 transition-colors duration-200"
             >
               <td className="p-3">{res.userId?.name || 'N/A'}</td>
               <td className="p-3 font-bold">{res.score}</td>
@@ -123,7 +126,7 @@ const ForumPostsList = ({ data, isLoading }) => {
         posts.map((post) => (
           <div
             key={post._id}
-            className="border border-gray-100 p-4 rounded-xl bg-gray-50"
+            className="border border-gray-100 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
           >
             <p className="font-semibold text-gray-900">
               {post.userId?.name || 'N/A'}
@@ -175,87 +178,84 @@ const MaterialDetailPage = () => {
 
   const isLoading = isLoadingMaterial;
 
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center text-gray-600">
+        Memuat detail materi...
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 via-purple-600/5 to-pink-600/10" />
-          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            {isLoading ? (
-              <div className="h-24"></div> // Placeholder for loading
-            ) : (
-              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-                <div>
-                  <Link
-                    to={`${basePath}/courses/${courseId}/materials`}
-                    className="text-sm font-semibold text-indigo-600 hover:underline mb-2 inline-block"
-                  >
-                    &larr; Kembali ke Daftar Materi
-                  </Link>
-                  <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-2">
-                    Detail Materi
-                  </h1>
-                  <p className="text-lg font-normal text-gray-600">
-                    <span className="font-semibold">
-                      {materialDetail?.data?.title || '...'}
-                    </span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => setForumOpen(true)}
-                  className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold px-8 py-4 rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  <span>Buka Forum Diskusi</span>
-                </button>
-              </div>
-            )}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+          <div>
+            <Link
+              to={`${basePath}/courses/${courseId}/materials`}
+              className="text-sm font-semibold text-indigo-600 hover:underline mb-2 inline-block"
+            >
+              &larr; Kembali ke Daftar Materi
+            </Link>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              Detail Materi:{' '}
+              <span className="font-normal">
+                {materialDetail?.data?.title || '...'}
+              </span>
+            </h1>
           </div>
+          {materialDetail && (
+            <button
+              onClick={() => setForumOpen(true)}
+              className="group inline-flex items-center gap-2 bg-primary text-white font-semibold px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all duration-200 mt-4 sm:mt-0"
+            >
+              <MessageSquare size={18} />
+              Buka Forum Diskusi
+            </button>
+          )}
         </div>
 
         {/* Content Section */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-12 -mt-16 relative z-10">
-          <div className="bg-white p-4 rounded-2xl shadow-md">
-            {/* Tabs */}
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-6 px-4">
-                <button
-                  onClick={() => setActiveTab('submissions')}
-                  className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
-                    activeTab === 'submissions'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:border-gray-300'
-                  }`}
-                >
-                  <FileText size={16} /> Tugas Terkumpul
-                </button>
-                <button
-                  onClick={() => setActiveTab('testResults')}
-                  className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
-                    activeTab === 'testResults'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:border-gray-300'
-                  }`}
-                >
-                  <CheckSquare size={16} /> Hasil Tes
-                </button>
-                <button
-                  onClick={() => setActiveTab('forumPosts')}
-                  className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
-                    activeTab === 'forumPosts'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-500 hover:border-gray-300'
-                  }`}
-                >
-                  <MessageSquare size={16} /> Riwayat Diskusi
-                </button>
-              </nav>
-            </div>
-
-            {/* Tab Content */}
-            <div className="min-h-[300px] pt-4">{TABS[activeTab]}</div>
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-md">
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-6 px-4">
+              <button
+                onClick={() => setActiveTab('submissions')}
+                className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
+                  activeTab === 'submissions'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:border-gray-300'
+                }`}
+              >
+                <FileText size={16} /> Tugas Terkumpul
+              </button>
+              <button
+                onClick={() => setActiveTab('testResults')}
+                className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
+                  activeTab === 'testResults'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:border-gray-300'
+                }`}
+              >
+                <CheckSquare size={16} /> Hasil Tes
+              </button>
+              <button
+                onClick={() => setActiveTab('forumPosts')}
+                className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
+                  activeTab === 'forumPosts'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:border-gray-300'
+                }`}
+              >
+                <MessageSquare size={16} /> Riwayat Diskusi
+              </button>
+            </nav>
           </div>
+
+          {/* Tab Content */}
+          <div className="min-h-[300px] pt-4">{TABS[activeTab]}</div>
         </div>
       </div>
 
