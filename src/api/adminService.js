@@ -7,8 +7,9 @@ export const getAllUsers = (params) => {
 export const createUser = (userData) => {
   return axiosInstance.post('/users', userData);
 };
-export const updateUser = (userId, userData) => {
-  return axiosInstance.put(`/users/${userId}`, userData);
+export const updateUser = async (userId, userData) => {
+  const response = await axiosInstance.put(`/users/${userId}`, userData);
+  return response.data; // <-- Kembalikan langsung properti 'data' dari respons
 };
 export const deleteUser = (userId) => {
   return axiosInstance.delete(`/users/${userId}`);

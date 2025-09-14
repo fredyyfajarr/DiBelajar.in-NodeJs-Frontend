@@ -7,75 +7,72 @@ import {
 } from 'react-router-dom';
 
 // Layout dan komponen Rute
-import MainLayout from '/src/layouts/MainLayout.jsx';
-import ProtectedRoute from '/src/components/ProtectedRoute.jsx';
-import RoleBasedRoute from '/src/components/RoleBasedRoute.jsx';
-import ToastContainer from '/src/components/Toast.jsx';
+import MainLayout from './layouts/MainLayout.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import RoleBasedRoute from './components/RoleBasedRoute.jsx';
+import ToastContainer from './components/Toast.jsx';
 
 // Halaman-halaman di-import menggunakan React.lazy
-const LandingPage = React.lazy(() => import('/src/pages/LandingPage.jsx'));
-const AllCoursesPage = React.lazy(() =>
-  import('/src/pages/AllCoursesPage.jsx')
-);
+const LandingPage = React.lazy(() => import('./pages/LandingPage.jsx'));
+const AllCoursesPage = React.lazy(() => import('./pages/AllCoursesPage.jsx'));
 const CourseDetailPage = React.lazy(() =>
-  import('/src/pages/CourseDetailPage.jsx')
+  import('./pages/CourseDetailPage.jsx')
 );
-const DashboardPage = React.lazy(() => import('/src/pages/DashboardPage.jsx'));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage.jsx'));
 
-// Halaman baru untuk profil
-const EditProfilePage = React.lazy(() =>
-  import('/src/pages/EditProfilePage.jsx')
-);
-const ProfilePage = React.lazy(() => import('/src/pages/ProfilePage.jsx'));
+// Halaman baru untuk profil dan pengaturan
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage.jsx'));
+const MyProfilePage = React.lazy(() => import('./pages/MyProfilePage.jsx'));
+const EditProfilePage = React.lazy(() => import('./pages/EditProfilePage.jsx'));
+const SettingsPage = React.lazy(() => import('./pages/SettingsPage.jsx'));
 
 // Halaman About dan Contact
-const AboutPage = React.lazy(() => import('/src/pages/AboutPage.jsx'));
-const ContactPage = React.lazy(() => import('/src/pages/ContactPage.jsx'));
+const AboutPage = React.lazy(() => import('./pages/AboutPage.jsx'));
+const ContactPage = React.lazy(() => import('./pages/ContactPage.jsx'));
 
 // Halaman Admin
 const AdminDashboardPage = React.lazy(() =>
-  import('/src/pages/admin/AdminDashboardPage.jsx')
+  import('./pages/admin/AdminDashboardPage.jsx')
 );
 const UserManagementPage = React.lazy(() =>
-  import('/src/pages/admin/UserManagementPage.jsx')
+  import('./pages/admin/UserManagementPage.jsx')
 );
 const CourseManagementPage = React.lazy(() =>
-  import('/src/pages/admin/CourseManagementPage.jsx')
+  import('./pages/admin/CourseManagementPage.jsx')
 );
 const MaterialManagementPage = React.lazy(() =>
-  import('/src/pages/admin/MaterialManagementPage.jsx')
+  import('./pages/admin/MaterialManagementPage.jsx')
 );
 const MaterialDetailPage = React.lazy(() =>
-  import('/src/pages/admin/MaterialDetailPage.jsx')
+  import('./pages/admin/MaterialDetailPage.jsx')
 );
 const EnrollmentManagementPage = React.lazy(() =>
-  import('/src/pages/admin/EnrollmentManagementPage.jsx')
+  import('./pages/admin/EnrollmentManagementPage.jsx')
 );
 const CategoryManagementPage = React.lazy(() =>
-  import('/src/pages/admin/CategoryManagementPage.jsx')
+  import('./pages/admin/CategoryManagementPage.jsx')
 );
 
 // Halaman Instruktur
 const InstructorEnrollmentPage = React.lazy(() =>
-  import('/src/pages/instructor/InstructorEnrollmentPage.jsx')
+  import('./pages/instructor/InstructorEnrollmentPage.jsx')
 );
 const StudentProgressPage = React.lazy(() =>
-  import('/src/pages/instructor/StudentProgressPage.jsx')
+  import('./pages/instructor/StudentProgressPage.jsx')
 );
 
 // Halaman Siswa
 const StudentDashboardPage = React.lazy(() =>
-  import('/src/pages/student/StudentDashboardPage.jsx')
+  import('./pages/student/StudentDashboardPage.jsx')
 );
 const LearningPage = React.lazy(() =>
-  import('/src/pages/student/LearningPage.jsx')
+  import('./pages/student/LearningPage.jsx')
 );
 const CertificatePage = React.lazy(() =>
-  import('/src/pages/student/CertificatePage.jsx')
+  import('./pages/student/CertificatePage.jsx')
 );
-// Anda juga memerlukan halaman analitik
 const CourseAnalyticsPage = React.lazy(() =>
-  import('/src/pages/instructor/CourseAnalyticsPage.jsx')
+  import('./pages/instructor/CourseAnalyticsPage.jsx')
 );
 
 function App() {
@@ -91,8 +88,8 @@ function App() {
           <Route path="/courses/:courseSlug" element={<CourseDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/profile/:userSlug" element={<ProfilePage />} />{' '}
-          {/* <-- RUTE PROFIL PUBLIK */}
+          <Route path="/profile/:userSlug" element={<ProfilePage />} />
+
           {/* Rute Terproteksi */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -105,8 +102,13 @@ function App() {
               path="/learn/:courseSlug/certificate"
               element={<CertificatePage />}
             />
-            <Route path="/profile/edit" element={<EditProfilePage />} />{' '}
-            {/* <-- RUTE EDIT PROFIL (PRIVAT) */}
+
+            {/* --- Rute Baru Ditambahkan --- */}
+            <Route path="/profile" element={<MyProfilePage />} />
+            <Route path="/profile/edit" element={<EditProfilePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            {/* ------------------------- */}
+
             {/* Rute Khusus Admin */}
             <Route
               path="/admin"
@@ -127,13 +129,13 @@ function App() {
                 path="enrollments"
                 element={<EnrollmentManagementPage />}
               />
-              {/* Admin juga bisa akses analitik */}
               <Route
                 path="courses/:courseId/analytics"
                 element={<CourseAnalyticsPage />}
               />
               <Route path="categories" element={<CategoryManagementPage />} />
             </Route>
+
             {/* Rute Khusus Instruktur */}
             <Route
               path="/instructor"
@@ -162,8 +164,7 @@ function App() {
               <Route
                 path="courses/:courseId/analytics"
                 element={<CourseAnalyticsPage />}
-              />{' '}
-              {/* <-- RUTE ANALITIK */}
+              />
             </Route>
           </Route>
         </Route>

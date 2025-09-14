@@ -1,4 +1,3 @@
-// src/store/authStore.js
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -15,17 +14,27 @@ const useAuthStore = create(
       token: null,
       isAuthenticated: false,
       login: (userData, token) => {
-        const cleanToken = sanitizeToken(token); // <-- Gunakan helper
+        const cleanToken = sanitizeToken(token);
         set({ user: userData, token: cleanToken, isAuthenticated: true });
       },
       setToken: (newToken) => {
-        const cleanToken = sanitizeToken(newToken); // <-- Gunakan helper
+        const cleanToken = sanitizeToken(newToken);
         set((state) => ({ ...state, token: cleanToken }));
       },
-      updateUser: (newUserData) =>
-        set((state) => ({
-          user: { ...state.user, ...newUserData },
-        })),
+
+      // --- PERBAIKAN UTAMA DAN FINAL DI SINI ---
+      updateUser: (newUserData) => {
+        // DEBUGGING LANGKAH 3: Apakah fungsi ini dipanggil, dan apa isinya?
+        console.log(
+          'AUTH STORE: Menerima data baru untuk diupdate:',
+          newUserData
+        );
+        set((currentState) => {
+          const updatedUser = { ...currentState.user, ...newUserData };
+          return { ...currentState, user: updatedUser };
+        });
+      },
+
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
       },
@@ -40,9 +49,7 @@ const useAuthStore = create(
       },
     }),
     {
-      name: 'auth-storage', // Nama key di localStorage
-
-      // PERBAIKAN UTAMA: Menggunakan cara standar dan benar untuk localStorage
+      name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
     }
   )

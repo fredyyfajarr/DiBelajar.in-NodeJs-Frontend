@@ -31,11 +31,38 @@ export const useCreateUser = () => {
 
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
+  const { updateUser: updateUserInStore } = useAuthStore();
+
   return useMutation({
     mutationFn: ({ userId, userData }) =>
       adminService.updateUser(userId, userData),
-    onSuccess: () => {
+
+    // --- PERBAIKAN UTAMA DI SINI ---
+    // Parameter 'response' sekarang kita ganti nama menjadi 'updatedUser' agar lebih jelas,
+    // karena ini adalah objek pengguna yang sudah di-update.
+    onSuccess: (updatedUser) => {
+      // console.log('HOOK: Data user yang diterima setelah update:', updatedUser);
+
+      // Pastikan data yang diterima valid sebelum melanjutkan
+      if (!updatedUser) {
+        // console.error('HOOK: Menerima data undefined setelah update.');
+        return;
+      }
+
+      // Invalidate query list pengguna (untuk halaman admin)
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+
+      // Ambil state pengguna saat ini untuk perbandingan
+      const currentUser = useAuthStore.getState().user;
+
+      // Cek apakah pengguna yang diupdate adalah pengguna yang sedang login
+      if (currentUser && updatedUser && currentUser._id === updatedUser._id) {
+        // Jika ya, perbarui state di Zustand dengan data yang sudah benar
+        updateUserInStore(updatedUser);
+      }
+    },
+    onError: (error) => {
+      // console.error('HOOK: Update user mutation failed:', error.response);
     },
   });
 };
