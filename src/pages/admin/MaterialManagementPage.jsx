@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useMaterials, useDeleteMaterial } from '/src/hooks/useAdmin.js';
+import { useCourseDetail } from '/src/hooks/useCourses.js'; // Impor hook untuk detail kursus
 import useAuthStore from '/src/store/authStore.js';
 import MaterialFormModal from '/src/components/admin/MaterialFormModal.jsx';
 import ConfirmationModal from '/src/components/ConfirmationModal.jsx';
@@ -19,14 +20,17 @@ const MaterialManagementPage = () => {
     materialId: null,
   });
 
-  const { data: response, isLoading } = useMaterials(courseId);
+  const { data: response, isLoading: isLoadingMaterials } =
+    useMaterials(courseId);
   const { mutate: deleteMaterial } = useDeleteMaterial();
 
+  // Mengambil data detail kursus secara terpisah
+  const { data: courseData, isLoading: isLoadingCourse } =
+    useCourseDetail(courseId);
+
   const materials = response?.data?.data || [];
-  const courseTitle =
-    materials.length > 0
-      ? materials[0].courseId?.title
-      : 'Memuat Nama Kursus...';
+  // Menggunakan judul dari courseData, bukan dari materi pertama
+  const courseTitle = courseData?.course?.title || 'Memuat Nama Kursus...';
 
   const basePath =
     user?.role === 'admin' ? '/admin/courses' : '/instructor/courses';
@@ -46,6 +50,9 @@ const MaterialManagementPage = () => {
       { onSuccess: closeDeleteConfirmation }
     );
   };
+
+  // Gabungkan status loading
+  const isLoading = isLoadingMaterials || isLoadingCourse;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -100,7 +107,9 @@ const MaterialManagementPage = () => {
                       <td
                         className="p-3 text-sm text-gray-600"
                         dangerouslySetInnerHTML={{
-                          __html: material.description.substring(0, 70),
+                          __html:
+                            material.description.substring(0, 70) +
+                            (material.description.length > 70 ? '...' : ''),
                         }}
                       />
                       <td className="p-3">

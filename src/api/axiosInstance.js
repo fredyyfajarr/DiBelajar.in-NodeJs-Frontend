@@ -1,32 +1,19 @@
+// src/api/axiosInstance.js
 import axios from 'axios';
 import useAuthStore from '/src/store/authStore.js';
+import authService from './authService.js';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  withCredentials: true, // WAJIB: Agar cookie bisa dikirim dan diterima
 });
 
 // Interceptor untuk menyisipkan token JWT secara otomatis
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Ambil token dari Zustand store
     const token = useAuthStore.getState().token;
     if (token) {
-      // Debug: Log token untuk memeriksa format
-      console.log('Token from store:', token);
-      console.log('Token starts with Bearer:', token.startsWith('Bearer '));
-      
-      // Jika token ada, tambahkan ke header Authorization dengan format Bearer
-      // Periksa apakah token sudah memiliki prefix "Bearer "
-      const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      config.headers['Authorization'] = authHeader;
-      
-      console.log('Final Authorization header:', authHeader);
-    }
-    if (config.data instanceof FormData) {
-      delete config.headers['Content-Type']; // biar browser set otomatis
-    } else if (config.data && typeof config.data === 'object' && !config.headers['Content-Type']) {
-      // Set Content-Type untuk JSON data jika belum ada
-      config.headers['Content-Type'] = 'application/json';
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
@@ -35,22 +22,68 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Interceptor untuk menangani response error (401, 403, dll)
+// Variabel untuk mencegah refresh berulang kali
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Interceptor untuk menangani response
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
-    // PERBAIKAN: Bagian ini dinonaktifkan untuk mencegah logout otomatis yang tidak diinginkan.
-    // Penanganan error 401 sekarang akan dikelola di tempat yang lebih spesifik (misalnya di dalam hook).
-    /*
-    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
-      const { logout } = useAuthStore.getState();
-      logout();
-      // Redirect ke halaman utama
-      window.location.href = '/';
+  async (error) => {
+    const originalRequest = error.config;
+    const { logout, setToken } = useAuthStore.getState();
+
+    // Cek jika error adalah 401 dan bukan dari endpoint refresh-token itu sendiri
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers['Authorization'] = 'Bearer ' + token;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const response = await authService.refreshToken();
+        const newAccessToken = response.data.token;
+
+        setToken(newAccessToken);
+
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+        processQueue(null, newAccessToken);
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        logout();
+        window.location.href = '/';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
-    */
+
     return Promise.reject(error);
   }
 );

@@ -22,7 +22,7 @@ const CategoryManagementPage = () => {
       },
       onError: () => {
         error('Gagal menambahkan kategori');
-      }
+      },
     });
   };
 
@@ -33,7 +33,7 @@ const CategoryManagementPage = () => {
         {
           label: 'Batal',
           handler: () => {},
-          primary: false
+          primary: false,
         },
         {
           label: 'Hapus',
@@ -42,14 +42,16 @@ const CategoryManagementPage = () => {
               onSuccess: () => {
                 success('Kategori berhasil dihapus');
               },
-              onError: () => {
-                error('Gagal menghapus kategori');
-              }
+              onError: (err) => {
+                const errorMessage =
+                  err.response?.data?.error || 'Gagal menghapus kategori';
+                error(errorMessage, { title: 'Gagal Menghapus' });
+              },
             });
           },
-          primary: true
-        }
-      ]
+          primary: true,
+        },
+      ],
     });
   };
 
