@@ -18,6 +18,16 @@ export const useCreateCategory = () => {
   });
 };
 
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: categoryService.update,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+};
+
 export const useDeleteCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({

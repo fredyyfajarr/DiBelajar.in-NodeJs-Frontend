@@ -14,4 +14,12 @@ const remove = async (id) => {
   await axiosInstance.delete(`/categories/${id}`);
 };
 
-export default { getAll, create, remove };
+const update = async ({ categoryId, categoryData }) => {
+  const response = await axiosInstance.put(
+    `/categories/${categoryId}`,
+    categoryData
+  );
+  return response.data.data;
+};
+
+export default { getAll, create, remove, update };
