@@ -187,7 +187,7 @@ const CTASection = () => {
                 ))}
               </div>
               <div className="text-left">
-                <div className="text-sm font-semibold text-gray-700">Build With MERN STACK</div>
+                <div className="text-sm md:font-semibold font-black text-gray-700">Build With MERN STACK</div>
                 <div className="text-xs text-gray-500">Di Buat dengan Tech Stack Masa Kini</div>
               </div>
             </div>
