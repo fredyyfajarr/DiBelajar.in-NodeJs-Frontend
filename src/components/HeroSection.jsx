@@ -77,7 +77,7 @@ const HeroSection = () => {
         <div className="text-center max-w-5xl">
           {/* Main Title */}
           <motion.h1
-            className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight mb-8"
+            className="text-5xl md:text-7xl lg:text-8xl section-heading mb-8"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -88,13 +88,9 @@ const HeroSection = () => {
                 variants={wordVariants}
                 className={`inline-block mr-3 ${
                   index % 2 === 0 
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent' 
+                    ? 'gradient-text' 
                     : 'text-gray-800'
                 }`}
-                style={{
-                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  fontWeight: '800',
-                }}
               >
                 {word}
               </motion.span>
