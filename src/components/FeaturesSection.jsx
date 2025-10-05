@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, BookOpen, Heart } from 'lucide-react';
+// import { ReactComponent as ExpertIcon } from '/src/assets/icons/expert.svg';
 
 const features = [
   {

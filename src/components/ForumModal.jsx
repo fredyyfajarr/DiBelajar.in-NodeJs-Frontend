@@ -9,6 +9,7 @@ import useAuthStore from '/src/store/authStore.js';
 const Post = ({ post, onReplyClick, isReplyingToThis }) => {
   const { user } = useAuthStore();
   const isOwnPost = post.userId?._id === user._id;
+  // console.log('Rendering Post:', post._id, 'isOwnPost:', isOwnPost);
 
   // Class untuk menyorot post yang sedang dibalas
   const highlightClass = isReplyingToThis

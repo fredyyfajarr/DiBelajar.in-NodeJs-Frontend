@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 /* src/index.css */
 @tailwind base;
 @tailwind components;
@@ -11,6 +12,7 @@
   --color-text-primary: #1e293b; /* Abu-abu Gelap */
   --color-text-muted: #64748b; /* Abu-abu */
   --color-border: #e2e8f0; /* Abu-abu Terang */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Tema Hijau */
