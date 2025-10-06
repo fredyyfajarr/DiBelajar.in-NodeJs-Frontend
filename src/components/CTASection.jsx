@@ -174,20 +174,20 @@ const CTASection = () => {
             variants={itemVariants}
             className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-12"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-3">
+            <div className="flex items-center gap-3 sm:flex-row flex-col sm:items-center">
+              <div className="flex -space-x-2">
                 {iconPaths.map((src, i) => (
                   <motion.img
                     key={i}
                     src={src}
                     alt={`icon-${i}`}
-                    className="w-12 h-12 px-2" // ukuran icon (lebih besar dari w-5 h-5)
+                    className="w-12 h-12 px-2"
                     whileHover={{ scale: 1.2, zIndex: 10 }}
                   />
                 ))}
               </div>
-              <div className="text-left">
-                <div className="text-sm md:font-semibold font-black text-gray-700">Build With MERN STACK</div>
+              <div className="text-left mt-2 sm:mt-0">
+                <div className="text-sm md:font-semibold text-center font-black text-gray-700">Build With MERN STACK</div>
                 <div className="text-xs text-gray-500">Di Buat dengan Tech Stack Masa Kini</div>
               </div>
             </div>

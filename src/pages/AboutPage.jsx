@@ -369,7 +369,7 @@ const AboutPage = () => {
               <div className="flex justify-center">
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-8 max-w-md">
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -384,7 +384,7 @@ const AboutPage = () => {
                   </motion.div>
 
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -413,7 +413,7 @@ const AboutPage = () => {
               <div className="flex justify-center">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-2xl">
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -428,7 +428,7 @@ const AboutPage = () => {
                   </motion.div>
 
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -443,7 +443,7 @@ const AboutPage = () => {
                   </motion.div>
 
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 col-span-2 md:col-span-1"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300 col-span-2 md:col-span-1"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -472,7 +472,7 @@ const AboutPage = () => {
               <div className="flex justify-center">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl">
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -487,7 +487,7 @@ const AboutPage = () => {
                   </motion.div>
 
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -502,7 +502,7 @@ const AboutPage = () => {
                   </motion.div>
 
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -517,7 +517,7 @@ const AboutPage = () => {
                   </motion.div>
 
                   <motion.div
-                    className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group bg-white rounded-2xl p-8 transition-all duration-300"
                     whileHover={{ y: -8, scale: 1.05 }}
                   >
                     <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">

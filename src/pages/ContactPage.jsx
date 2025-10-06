@@ -246,7 +246,7 @@ const ContactPage = () => {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <div className="bg-white rounded-3xl shadow-2xl p-8">
+              <div className="bg-transparent p-8">
                 <motion.div
                   className="text-center mb-8"
                   initial={{ opacity: 0, y: 20 }}

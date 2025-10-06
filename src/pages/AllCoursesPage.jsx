@@ -258,10 +258,18 @@ const AllCoursesPage = () => {
               <p className="text-gray-600">Pilih kategori yang sesuai dengan minat Anda</p>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-4">
+            <div
+              className="
+                flex flex-wrap sm:flex-nowrap justify-center gap-4
+                overflow-x-auto pb-2
+                sm:overflow-visible sm:pb-0
+                -mx-4 px-4
+                scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-transparent
+              "
+            >
               <motion.button
                 onClick={() => handleCategoryChange('')}
-                className={`px-8 py-4 font-bold text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                className={`min-w-[160px] px-6 py-3 sm:px-8 sm:py-4 font-bold text-base sm:text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 ${
                   category === ''
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-2xl shadow-purple-200'
                     : 'bg-white/80 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 border-2 border-purple-100 hover:border-purple-300'
@@ -269,19 +277,18 @@ const AllCoursesPage = () => {
                 whileHover={{ y: -3 }}
                 whileTap={{ scale: 0.97 }}
               >
-                <span className="flex items-center gap-3">
+                <span className="flex items-center gap-2 sm:gap-3">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                   Semua Kategori
                 </span>
               </motion.button>
-              
               {categories.map((cat, index) => (
                 <motion.button
                   key={cat._id}
                   onClick={() => handleCategoryChange(cat.slug)}
-                  className={`px-8 py-4 font-bold text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                  className={`min-w-[160px] px-6 py-3 sm:px-8 sm:py-4 font-bold text-base sm:text-lg rounded-2xl transition-all duration-300 transform hover:scale-105 ${
                     category === cat.slug
                       ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-2xl shadow-purple-200'
                       : 'bg-white/80 text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 border-2 border-purple-100 hover:border-purple-300'
