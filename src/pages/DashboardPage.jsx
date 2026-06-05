@@ -2,12 +2,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
+import authService from '/src/api/authService.js';
 
 const DashboardPage = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Tetap logout lokal walau request logout gagal.
+    }
     logout();
     navigate('/');
   };

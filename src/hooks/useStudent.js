@@ -32,9 +32,17 @@ export const useMyEnrollments = (userId) => {
 };
 
 export const useSubmitAssignment = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: studentService.submitAssignment,
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['course', variables.courseSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['notifications'],
+      });
       toast.success('Tugas berhasil dikumpulkan!', {
         title: 'Pengumpulan Berhasil',
       });
@@ -48,9 +56,17 @@ export const useSubmitAssignment = () => {
 };
 
 export const useSubmitTestResult = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: studentService.submitTestResult,
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['course', variables.courseSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['notifications'],
+      });
       const score = data.data.score;
       toast.success(`Tes selesai! Skor Anda: ${score}`, {
         title: 'Tes Berhasil Diselesaikan',

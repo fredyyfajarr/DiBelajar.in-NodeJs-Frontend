@@ -282,6 +282,9 @@ export const useCreateForumPost = () => {
       queryClient.invalidateQueries({
         queryKey: ['course', variables.courseSlug],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['notifications'],
+      });
     },
     onError: (error) => {
       alert(error.response?.data?.error || 'Gagal mengirim postingan.');

@@ -14,6 +14,14 @@ const refreshToken = () => {
   return axiosInstance.post('/auth/refresh-token');
 };
 
+const getMe = () => {
+  return axiosInstance.get('/auth/me');
+};
+
+const logout = () => {
+  return axiosInstance.post('/auth/logout');
+};
+
 const forgotPassword = (data) => {
   return axiosInstance.post('/auth/forgot-password', data);
 };
@@ -29,6 +37,8 @@ export default {
   login,
   register, // <-- dan diekspor
   refreshToken,
+  getMe,
+  logout,
   forgotPassword,
   resetPassword,
 };

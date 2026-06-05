@@ -21,6 +21,13 @@ const useAuthStore = create(
         const cleanToken = sanitizeToken(newToken);
         set((state) => ({ ...state, token: cleanToken }));
       },
+      setUser: (userData) => {
+        set((state) => ({
+          ...state,
+          user: userData,
+          isAuthenticated: !!state.token && !!userData,
+        }));
+      },
 
       updateUser: (newUserData) => {
         set((currentState) => {

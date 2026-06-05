@@ -1,17 +1,12 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import Modal from './Modal';
-// Impor useUpdateProgress
-import {
-  useSubmitTestResult,
-  useUpdateProgress,
-} from '/src/hooks/useStudent.js';
+import { useSubmitTestResult } from '/src/hooks/useStudent.js';
 
 const TestModal = ({ isOpen, onClose, courseId, material, courseSlug }) => {
   // Tambahkan courseSlug sebagai prop
   const { register, handleSubmit } = useForm();
   const { mutate: submitResult, isPending } = useSubmitTestResult();
-  const { mutate: updateProgress } = useUpdateProgress(); // Gunakan hook
   const questions = material?.testContent || [];
 
   const onSubmit = (data) => {
@@ -36,16 +31,10 @@ const TestModal = ({ isOpen, onClose, courseId, material, courseSlug }) => {
         courseId,
         materialId: material._id,
         resultData: { score, answers: submittedAnswers },
+        courseSlug,
       },
       {
         onSuccess: () => {
-          // Setelah tes berhasil, panggil updateProgress
-          updateProgress({
-            courseId,
-            materialId: material._id,
-            step: 'test',
-            courseSlug,
-          });
           onClose(); // Tutup modal setelah semuanya berhasil
         },
       }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useModalStore from '/src/store/modalStore.js';
 import useAuthStore from '/src/store/authStore.js';
 import useToastStore from '/src/store/toastStore.js';
+import authService from '/src/api/authService.js';
 import { ThemeContext } from '/src/context/themeContextValue.js';
 import { getDashboardPath } from '../utils/getDashboardPath';
 import { Sun, Moon, LogOut, Search, User, Menu, X, Home, BookOpen, Settings, ChevronDown } from 'lucide-react';
@@ -31,7 +32,12 @@ const Navbar = () => {
         },
         {
           label: 'Logout',
-          handler: () => {
+          handler: async () => {
+            try {
+              await authService.logout();
+            } catch {
+              // Tetap bersihkan state lokal walau cookie/session server gagal dihapus.
+            }
             logout();
             navigate('/');
             setIsMenuOpen(false);
