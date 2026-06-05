@@ -78,6 +78,18 @@ export const getSubmissions = (courseId, materialId) => {
   );
 };
 
+export const gradeAssignmentSubmission = ({
+  courseId,
+  materialId,
+  submissionId,
+  gradeData,
+}) => {
+  return axiosInstance.patch(
+    `/courses/${courseId}/materials/${materialId}/assignments/${submissionId}/grade`,
+    gradeData
+  );
+};
+
 export const getTestResults = (courseId, materialId) => {
   return axiosInstance.get(
     `/courses/${courseId}/materials/${materialId}/tests`
@@ -125,6 +137,7 @@ const adminService = {
   getAllEnrollments,
   deleteEnrollment,
   getSubmissions,
+  gradeAssignmentSubmission,
   getTestResults,
   getForumPosts,
   getMaterialDetail,

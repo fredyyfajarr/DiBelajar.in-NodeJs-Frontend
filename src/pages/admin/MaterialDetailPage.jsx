@@ -5,20 +5,103 @@ import {
   useTestResults,
   useForumPosts,
   useMaterialDetail,
+  useGradeSubmission,
 } from '/src/hooks/useAdmin.js';
 import useAuthStore from '/src/store/authStore.js';
 import ForumModal from '/src/components/ForumModal.jsx';
 import { MessageSquare, CheckSquare, FileText } from 'lucide-react';
 
-// Komponen-komponen list (SubmissionsList, TestResultsList, ForumPostsList) tidak perlu diubah.
-// Cukup salin dan tempel seperti yang ada di file Anda saat ini.
+const getResponseData = (response) =>
+  response?.data?.data || response?.data || [];
 
-const SubmissionsList = ({ data, isLoading }) => {
+const SubmissionRow = ({ submission, courseId, materialId }) => {
+  const [grade, setGrade] = useState(submission.grade ?? '');
+  const [feedback, setFeedback] = useState(submission.feedback || '');
+  const { mutate: gradeSubmission, isPending } = useGradeSubmission();
+
+  const handleSubmitGrade = (event) => {
+    event.preventDefault();
+    gradeSubmission({
+      courseId,
+      materialId,
+      submissionId: submission._id,
+      gradeData: {
+        grade: Number(grade),
+        feedback,
+      },
+    });
+  };
+
+  return (
+    <tr className="border-b last:border-0 hover:bg-gray-50 transition-colors duration-200 align-top">
+      <td className="p-3">{submission.userId?.name || 'N/A'}</td>
+      <td className="p-3">
+        {new Date(submission.submittedAt).toLocaleString()}
+      </td>
+      <td className="p-3">
+        <a
+          href={submission.submissionFileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          Lihat File
+        </a>
+      </td>
+      <td className="p-3">
+        <span
+          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+            submission.status === 'graded'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-yellow-100 text-yellow-700'
+          }`}
+        >
+          {submission.status === 'graded' ? 'Sudah dinilai' : 'Menunggu nilai'}
+        </span>
+        {submission.gradedBy?.name && (
+          <p className="mt-1 text-xs text-gray-500">
+            Oleh {submission.gradedBy.name}
+          </p>
+        )}
+      </td>
+      <td className="p-3">
+        <form onSubmit={handleSubmitGrade} className="space-y-2 min-w-64">
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={grade}
+            onChange={(event) => setGrade(event.target.value)}
+            className="w-24 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            placeholder="0-100"
+            required
+          />
+          <textarea
+            value={feedback}
+            onChange={(event) => setFeedback(event.target.value)}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            rows="2"
+            placeholder="Feedback singkat"
+          />
+          <button
+            type="submit"
+            disabled={isPending}
+            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white transition hover:bg-opacity-90 disabled:opacity-50"
+          >
+            {isPending ? 'Menyimpan...' : 'Simpan Nilai'}
+          </button>
+        </form>
+      </td>
+    </tr>
+  );
+};
+
+const SubmissionsList = ({ data, isLoading, courseId, materialId }) => {
   if (isLoading)
     return (
       <p className="text-center py-4 text-gray-600">Memuat daftar tugas...</p>
     );
-  const submissions = data?.data || [];
+  const submissions = getResponseData(data);
   return (
     <table className="w-full">
       <thead>
@@ -30,34 +113,25 @@ const SubmissionsList = ({ data, isLoading }) => {
             Waktu Submit
           </th>
           <th className="text-left p-3 font-semibold text-gray-700">File</th>
+          <th className="text-left p-3 font-semibold text-gray-700">Status</th>
+          <th className="text-left p-3 font-semibold text-gray-700">
+            Penilaian
+          </th>
         </tr>
       </thead>
       <tbody>
         {submissions.length > 0 ? (
           submissions.map((sub) => (
-            <tr
+            <SubmissionRow
               key={sub._id}
-              className="border-b last:border-0 hover:bg-gray-50 transition-colors duration-200"
-            >
-              <td className="p-3">{sub.userId?.name || 'N/A'}</td>
-              <td className="p-3">
-                {new Date(sub.submittedAt).toLocaleString()}
-              </td>
-              <td className="p-3">
-                <a
-                  href={sub.submissionFileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Lihat File
-                </a>
-              </td>
-            </tr>
+              submission={sub}
+              courseId={courseId}
+              materialId={materialId}
+            />
           ))
         ) : (
           <tr>
-            <td colSpan="3" className="text-center p-4 text-gray-600">
+            <td colSpan="5" className="text-center p-4 text-gray-600">
               Belum ada tugas yang dikumpulkan.
             </td>
           </tr>
@@ -166,7 +240,12 @@ const MaterialDetailPage = () => {
 
   const TABS = {
     submissions: (
-      <SubmissionsList data={submissionsData} isLoading={submissionsLoading} />
+      <SubmissionsList
+        data={submissionsData}
+        isLoading={submissionsLoading}
+        courseId={courseId}
+        materialId={materialId}
+      />
     ),
     testResults: (
       <TestResultsList data={testResultsData} isLoading={testResultsLoading} />

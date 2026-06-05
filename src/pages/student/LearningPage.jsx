@@ -5,6 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCourseDetail } from '/src/hooks/useCourses.js';
 import { useUpdateProgress } from '/src/hooks/useStudent.js';
 import useToastStore from '/src/store/toastStore.js';
+import {
+  REQUIRED_FORUM_POSTS,
+  getMaterialProgress,
+  getMaterialProgressState,
+} from '/src/utils/learningProgress.js';
 import SubmissionModal from '/src/components/SubmissionModal.jsx';
 import TestModal from '../../components/TestModal.jsx';
 import ForumModal from '../../components/ForumModal.jsx';
@@ -138,12 +143,15 @@ const MaterialItem = ({
   courseSlug,
   onToggleActivity,
 }) => {
-  const testCompleted = progress?.hasCompletedTest || false;
-  const assignmentSubmitted = progress?.hasSubmittedAssignment || false;
-  const forumPostCount = progress?.forumPostCount || 0;
-  const materialCompleted = progress?.isCompleted || false;
-
-  const hasTest = material.testContent && material.testContent.length > 0;
+  const {
+    hasTest,
+    testCompleted,
+    assignmentSubmitted,
+    forumPostCount,
+    materialCompleted,
+    canCompleteMaterial,
+    progressPercentage,
+  } = getMaterialProgressState(material, progress);
 
   const { mutate: updateProgress } = useUpdateProgress();
   const { confirm, success, error } = useToastStore();
@@ -182,21 +190,6 @@ const MaterialItem = ({
       ],
     });
   };
-
-  const canCompleteMaterial =
-    (hasTest ? testCompleted : true) &&
-    assignmentSubmitted &&
-    forumPostCount >= 2 &&
-    !materialCompleted;
-
-  const completedSteps = [
-    hasTest ? testCompleted : true,
-    assignmentSubmitted,
-    forumPostCount >= 2,
-  ].filter(Boolean).length;
-
-  const totalSteps = hasTest ? 3 : 2;
-  const progressPercentage = (completedSteps / totalSteps) * 100;
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -336,6 +329,14 @@ const LearningPage = () => {
       : 0;
   const allMaterialsCompleted =
     materials.length > 0 && completedMaterials === totalMaterials;
+  const selectedActivityProgress = getMaterialProgress(
+    enrollment?.progress,
+    selectedMaterialForActivity?._id
+  );
+  const selectedActivityState = getMaterialProgressState(
+    selectedMaterialForActivity,
+    selectedActivityProgress
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -416,8 +417,9 @@ const LearningPage = () => {
             Materi Pembelajaran
           </h2>
           {materials.map((material, index) => {
-            const materialProgress = enrollment?.progress.find(
-              (p) => p.materialId.toString() === material._id.toString()
+            const materialProgress = getMaterialProgress(
+              enrollment?.progress,
+              material._id
             );
             return (
               <MaterialItem
@@ -479,8 +481,9 @@ const LearningPage = () => {
             </div>
           </div>
           {materials.map((material, index) => {
-            const progress = enrollment?.progress.find(
-              (p) => p.materialId.toString() === material._id.toString()
+            const progress = getMaterialProgress(
+              enrollment?.progress,
+              material._id
             );
             const isCompleted = progress?.isCompleted || false;
             return (
@@ -536,27 +539,18 @@ const LearningPage = () => {
         {selectedMaterialForActivity && (
           <div className="space-y-4">
             {/* Quiz Activity */}
-            {selectedMaterialForActivity.testContent &&
-              selectedMaterialForActivity.testContent.length > 0 && (
+            {selectedActivityState.hasTest && (
                 <div className="bg-white p-4 rounded-lg border shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          enrollment?.progress.find(
-                            (p) =>
-                              p.materialId.toString() ===
-                              selectedMaterialForActivity._id.toString()
-                          )?.hasCompletedTest
+                          selectedActivityState.testCompleted
                             ? 'bg-green-500 text-white'
                             : 'bg-gray-200 text-gray-400'
                         }`}
                       >
-                        {enrollment?.progress.find(
-                          (p) =>
-                            p.materialId.toString() ===
-                            selectedMaterialForActivity._id.toString()
-                        )?.hasCompletedTest ? (
+                        {selectedActivityState.testCompleted ? (
                           <CheckCircle className="w-5 h-5" />
                         ) : (
                           <Play className="w-5 h-5" />
@@ -568,29 +562,15 @@ const LearningPage = () => {
                     </div>
                     <span
                       className={`text-xs px-2 py-1 rounded-full ${
-                        enrollment?.progress.find(
-                          (p) =>
-                            p.materialId.toString() ===
-                            selectedMaterialForActivity._id.toString()
-                        )?.hasCompletedTest
+                        selectedActivityState.testCompleted
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {enrollment?.progress.find(
-                        (p) =>
-                          p.materialId.toString() ===
-                          selectedMaterialForActivity._id.toString()
-                      )?.hasCompletedTest
-                        ? 'Selesai'
-                        : 'Belum'}
+                      {selectedActivityState.testCompleted ? 'Selesai' : 'Belum'}
                     </span>
                   </div>
-                  {!enrollment?.progress.find(
-                    (p) =>
-                      p.materialId.toString() ===
-                      selectedMaterialForActivity._id.toString()
-                  )?.hasCompletedTest && (
+                  {!selectedActivityState.testCompleted && (
                     <button
                       onClick={() => {
                         handleOpenModal('test', selectedMaterialForActivity);
@@ -610,20 +590,12 @@ const LearningPage = () => {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      enrollment?.progress.find(
-                        (p) =>
-                          p.materialId.toString() ===
-                          selectedMaterialForActivity._id.toString()
-                      )?.hasSubmittedAssignment
+                      selectedActivityState.assignmentSubmitted
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-200 text-gray-400'
                     }`}
                   >
-                    {enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.hasSubmittedAssignment ? (
+                    {selectedActivityState.assignmentSubmitted ? (
                       <CheckCircle className="w-5 h-5" />
                     ) : (
                       <FileText className="w-5 h-5" />
@@ -635,42 +607,25 @@ const LearningPage = () => {
                 </div>
                 <span
                   className={`text-xs px-2 py-1 rounded-full ${
-                    enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.hasSubmittedAssignment
+                    selectedActivityState.assignmentSubmitted
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  {enrollment?.progress.find(
-                    (p) =>
-                      p.materialId.toString() ===
-                      selectedMaterialForActivity._id.toString()
-                  )?.hasSubmittedAssignment
+                  {selectedActivityState.assignmentSubmitted
                     ? 'Selesai'
                     : 'Belum'}
                 </span>
               </div>
-              {!enrollment?.progress.find(
-                (p) =>
-                  p.materialId.toString() ===
-                  selectedMaterialForActivity._id.toString()
-              )?.hasSubmittedAssignment && (
+              {!selectedActivityState.assignmentSubmitted && (
                 <button
                   onClick={() => {
                     handleOpenModal('assignment', selectedMaterialForActivity);
                     setIsActivityMenuOpen(false);
                   }}
                   disabled={
-                    selectedMaterialForActivity.testContent &&
-                    selectedMaterialForActivity.testContent.length > 0 &&
-                    !enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.hasCompletedTest
+                    selectedActivityState.hasTest &&
+                    !selectedActivityState.testCompleted
                   }
                   className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -685,20 +640,12 @@ const LearningPage = () => {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      (enrollment?.progress.find(
-                        (p) =>
-                          p.materialId.toString() ===
-                          selectedMaterialForActivity._id.toString()
-                      )?.forumPostCount || 0) >= 2
+                      selectedActivityState.forumCompleted
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-200 text-gray-400'
                     }`}
                   >
-                    {(enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.forumPostCount || 0) >= 2 ? (
+                    {selectedActivityState.forumCompleted ? (
                       <CheckCircle className="w-5 h-5" />
                     ) : (
                       <MessageCircle className="w-5 h-5" />
@@ -706,51 +653,27 @@ const LearningPage = () => {
                   </div>
                   <span className="font-medium text-gray-900">
                     Forum Diskusi (
-                    {enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.forumPostCount || 0}
-                    /2)
+                    {selectedActivityState.forumPostCount}/
+                    {REQUIRED_FORUM_POSTS})
                   </span>
                 </div>
                 <span
                   className={`text-xs px-2 py-1 rounded-full ${
-                    (enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.forumPostCount || 0) >= 2
+                    selectedActivityState.forumCompleted
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  {(enrollment?.progress.find(
-                    (p) =>
-                      p.materialId.toString() ===
-                      selectedMaterialForActivity._id.toString()
-                  )?.forumPostCount || 0) >= 2
-                    ? 'Selesai'
-                    : 'Belum'}
+                  {selectedActivityState.forumCompleted ? 'Selesai' : 'Belum'}
                 </span>
               </div>
-              {(enrollment?.progress.find(
-                (p) =>
-                  p.materialId.toString() ===
-                  selectedMaterialForActivity._id.toString()
-              )?.forumPostCount || 0) < 2 && (
+              {!selectedActivityState.forumCompleted && (
                 <button
                   onClick={() => {
                     handleOpenModal('forum', selectedMaterialForActivity);
                     setIsActivityMenuOpen(false);
                   }}
-                  disabled={
-                    !enrollment?.progress.find(
-                      (p) =>
-                        p.materialId.toString() ===
-                        selectedMaterialForActivity._id.toString()
-                    )?.hasSubmittedAssignment
-                  }
+                  disabled={!selectedActivityState.assignmentSubmitted}
                   className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Mulai Diskusi

@@ -3,6 +3,8 @@ import adminService from '/src/api/adminService.js';
 import studentService from '../api/studentService';
 import useAuthStore from '/src/store/authStore.js';
 import * as notificationService from '../api/notificationService';
+import toast from '/src/utils/toast.js';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 const queryOptions = {
   staleTime: 5 * 60 * 1000, // Data dianggap fresh selama 5 menit
@@ -214,6 +216,32 @@ export const useSubmissions = (courseId, materialId) => {
     queryFn: () => adminService.getSubmissions(courseId, materialId),
     enabled: !!courseId && !!materialId,
     ...queryOptions,
+  });
+};
+
+export const useGradeSubmission = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: adminService.gradeAssignmentSubmission,
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'admin',
+          'submissions',
+          variables.courseId,
+          variables.materialId,
+        ],
+      });
+      toast.success('Nilai tugas berhasil disimpan.', {
+        title: 'Penilaian Berhasil',
+      });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Gagal menyimpan nilai tugas.'), {
+        title: 'Penilaian Gagal',
+      });
+    },
   });
 };
 
