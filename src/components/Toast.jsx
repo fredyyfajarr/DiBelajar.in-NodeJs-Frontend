@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -183,7 +183,6 @@ const Toast = ({ toast }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Button clicked:', action.label); // Debug log
                 action.handler();
                 handleClose();
               }}

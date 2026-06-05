@@ -4,7 +4,7 @@ import { useCourseAnalytics } from '/src/hooks/useAdmin.js';
 import { useCourseDetail } from '/src/hooks/useCourses.js'; // Untuk mendapatkan nama kursus
 import { motion } from 'framer-motion';
 
-const StatCard = ({ title, value, icon }) => (
+const StatCard = ({ title, value }) => (
   <div className="bg-white p-6 rounded-2xl shadow-sm">
     <p className="text-sm font-medium text-gray-500">{title}</p>
     <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>

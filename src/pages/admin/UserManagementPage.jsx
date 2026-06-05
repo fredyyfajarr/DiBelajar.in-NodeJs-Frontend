@@ -18,7 +18,7 @@ const UserManagementPage = () => {
     keyword: debouncedSearchTerm,
   });
   const { mutate: deleteUser } = useDeleteUser();
-  const { success, confirm } = useToastStore();
+  const { success } = useToastStore();
 
   const [modalState, setModalState] = useState({
     isOpen: false,

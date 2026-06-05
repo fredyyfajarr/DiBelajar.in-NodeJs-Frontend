@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useModalStore from '/src/store/modalStore.js';
 import useAuthStore from '/src/store/authStore.js';
 import useToastStore from '/src/store/toastStore.js';
-import { ThemeContext } from '/src/context/ThemeContext.jsx';
+import { ThemeContext } from '/src/context/themeContextValue.js';
 import { getDashboardPath } from '../utils/getDashboardPath';
 import { Sun, Moon, LogOut, Search, User, Menu, X, Home, BookOpen, Settings, ChevronDown } from 'lucide-react';
 

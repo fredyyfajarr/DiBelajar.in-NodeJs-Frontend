@@ -1,28 +1,23 @@
-/* eslint-disable no-unused-vars */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from './useAdmin';
 import studentService from '/src/api/studentService.js';
 import toast from '/src/utils/toast.js';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 export const useEnrollInCourse = () => {
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: studentService.enrollInCourse,
-    onSuccess: (data, courseId) => {
-      console.log('Enrollment successful:', data);
+    onSuccess: () => {
       toast.success('Selamat! Anda berhasil terdaftar di kursus ini.', {
-        title: 'Pendaftaran Berhasil'
+        title: 'Pendaftaran Berhasil',
       });
       navigate('/student-dashboard');
     },
     onError: (error) => {
-      console.error('Enrollment error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error data:', error.response?.data);
-      toast.error(error.response?.data?.error || 'Gagal mendaftar ke kursus.', {
-        title: 'Pendaftaran Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal mendaftar ke kursus.'), {
+        title: 'Pendaftaran Gagal',
       });
     },
   });
@@ -41,12 +36,12 @@ export const useSubmitAssignment = () => {
     mutationFn: studentService.submitAssignment,
     onSuccess: () => {
       toast.success('Tugas berhasil dikumpulkan!', {
-        title: 'Pengumpulan Berhasil'
+        title: 'Pengumpulan Berhasil',
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Gagal mengumpulkan tugas.', {
-        title: 'Pengumpulan Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal mengumpulkan tugas.'), {
+        title: 'Pengumpulan Gagal',
       });
     },
   });
@@ -58,12 +53,12 @@ export const useSubmitTestResult = () => {
     onSuccess: (data) => {
       const score = data.data.score;
       toast.success(`Tes selesai! Skor Anda: ${score}`, {
-        title: 'Tes Berhasil Diselesaikan'
+        title: 'Tes Berhasil Diselesaikan',
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Gagal mengirimkan hasil tes.', {
-        title: 'Tes Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal mengirimkan hasil tes.'), {
+        title: 'Tes Gagal',
       });
     },
   });
@@ -83,8 +78,8 @@ export const useUpdateProgress = () => {
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Gagal memperbarui progres.', {
-        title: 'Update Progres Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal memperbarui progres.'), {
+        title: 'Update Progres Gagal',
       });
     },
   });
@@ -118,12 +113,12 @@ export const useAddReview = () => {
         queryKey: ['my-review', variables.courseSlug],
       });
       toast.success('Terima kasih atas ulasan Anda!', {
-        title: 'Ulasan Berhasil'
+        title: 'Ulasan Berhasil',
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Gagal mengirim ulasan.', {
-        title: 'Ulasan Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal mengirim ulasan.'), {
+        title: 'Ulasan Gagal',
       });
     },
   });
@@ -151,12 +146,12 @@ export const useUpdateReview = () => {
         queryKey: ['my-review', variables.courseSlug],
       });
       toast.success('Ulasan berhasil diperbarui!', {
-        title: 'Update Berhasil'
+        title: 'Update Berhasil',
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Gagal memperbarui ulasan.', {
-        title: 'Update Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal memperbarui ulasan.'), {
+        title: 'Update Gagal',
       });
     },
   });
@@ -177,13 +172,24 @@ export const useDeleteReview = () => {
         queryKey: ['reviews', courseSlug],
       });
       toast.success('Ulasan berhasil dihapus.', {
-        title: 'Hapus Berhasil'
+        title: 'Hapus Berhasil',
       });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Gagal menghapus ulasan.', {
-        title: 'Hapus Gagal'
+      toast.error(getApiErrorMessage(error, 'Gagal menghapus ulasan.'), {
+        title: 'Hapus Gagal',
       });
+    },
+  });
+};
+
+export const useCompleteMaterial = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: studentService.markMaterialAsComplete,
+    onSuccess: () => {
+      // Invalidate query enrollment agar data progress di-refetch
+      queryClient.invalidateQueries(['studentEnrollments']);
     },
   });
 };

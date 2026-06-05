@@ -6,6 +6,7 @@ import CategoryFormModal from '/src/components/admin/CategoryFormModal.jsx';
 import ConfirmationModal from '/src/components/ConfirmationModal.jsx';
 import Pagination from '/src/components/Pagination.jsx';
 import { Tag, Plus, Edit, Trash2, Search } from 'lucide-react';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 const CategoryManagementPage = () => {
   const [page, setPage] = useState(1);
@@ -20,7 +21,7 @@ const CategoryManagementPage = () => {
   });
   const { mutate: deleteCategory } = useDeleteCategory();
 
-  const { success, error, confirm } = useToastStore();
+  const { success, error } = useToastStore();
 
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -57,9 +58,9 @@ const CategoryManagementPage = () => {
         closeDeleteConfirmation();
       },
       onError: (err) => {
-        const errorMessage =
-          err.response?.data?.error || 'Gagal menghapus kategori.';
-        error(errorMessage, { title: 'Gagal Menghapus' });
+        error(getApiErrorMessage(err, 'Gagal menghapus kategori.'), {
+          title: 'Gagal Menghapus',
+        });
         closeDeleteConfirmation();
       },
     });

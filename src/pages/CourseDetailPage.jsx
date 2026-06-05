@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -69,8 +69,8 @@ const CourseDetailPage = () => {
   const materialsToShow = isAuthenticated ? materials : materials.slice(0, 3);
 
   const handleEnrollClick = () => {
-    console.log('Enrolling in course:', course?._id || course?.slug);
-    console.log('Course data:', course);
+    // console.log('Enrolling in course:', course?._id || course?.slug);
+    // console.log('Course data:', course);
     enroll(course?._id || course?.slug);
   };
 

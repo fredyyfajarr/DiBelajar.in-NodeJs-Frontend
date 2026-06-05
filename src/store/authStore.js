@@ -22,13 +22,7 @@ const useAuthStore = create(
         set((state) => ({ ...state, token: cleanToken }));
       },
 
-      // --- PERBAIKAN UTAMA DAN FINAL DI SINI ---
       updateUser: (newUserData) => {
-        // DEBUGGING LANGKAH 3: Apakah fungsi ini dipanggil, dan apa isinya?
-        console.log(
-          'AUTH STORE: Menerima data baru untuk diupdate:',
-          newUserData
-        );
         set((currentState) => {
           const updatedUser = { ...currentState.user, ...newUserData };
           return { ...currentState, user: updatedUser };
@@ -40,11 +34,11 @@ const useAuthStore = create(
       },
       debugState: () => {
         const state = get();
-        console.log('AuthStore: Current state:', state);
-        console.log(
-          'AuthStore: localStorage:',
-          localStorage.getItem('auth-storage')
-        );
+        // console.log('AuthStore: Current state:', state);
+        // console.log(
+        //   'AuthStore: localStorage:',
+        //   localStorage.getItem('auth-storage')
+        // );
         return state;
       },
     }),

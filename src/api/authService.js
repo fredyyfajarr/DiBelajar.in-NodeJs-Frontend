@@ -10,12 +10,25 @@ const register = (userData) => {
   return axiosInstance.post('/auth/register', userData);
 };
 
-const refreshToken = (refreshToken) => {
-  return axiosInstance.post('/auth/refresh-token', { refreshToken });
+const refreshToken = () => {
+  return axiosInstance.post('/auth/refresh-token');
+};
+
+const forgotPassword = (data) => {
+  return axiosInstance.post('/auth/forgot-password', data);
+};
+
+const resetPassword = ({ token, password, confirmPassword }) => {
+  return axiosInstance.post(`/auth/reset-password/${token}`, {
+    password,
+    confirmPassword,
+  });
 };
 
 export default {
   login,
   register, // <-- dan diekspor
   refreshToken,
+  forgotPassword,
+  resetPassword,
 };

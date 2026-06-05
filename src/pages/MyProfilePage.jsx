@@ -68,13 +68,15 @@ const MyProfilePage = () => {
               <span>Edit Profil</span>
             </motion.div>
           </Link>
-          <motion.div
-            whileHover={{ y: -2 }}
-            className="w-full bg-gray-700 text-white p-4 rounded-xl shadow-lg flex items-center justify-center gap-3 font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
-          >
-            <Lock size={20} />
-            <span>Ubah Password</span>
-          </motion.div>
+          <Link to="/profile/change-password">
+            <motion.div
+              whileHover={{ y: -2 }}
+              className="w-full mt-6 bg-gray-700 text-white p-4 rounded-xl shadow-lg flex items-center justify-center gap-3 font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
+            >
+              <Lock size={20} />
+              <span>Ubah Password</span>
+            </motion.div>
+          </Link>
         </div>
       </div>
     </motion.div>

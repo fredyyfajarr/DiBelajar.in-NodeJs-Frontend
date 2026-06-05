@@ -8,10 +8,13 @@ const axiosInstance = axios.create({
   withCredentials: true, // WAJIB: Agar cookie bisa dikirim dan diterima
 });
 
+const sanitizeToken = (token) =>
+  token?.startsWith('Bearer ') ? token.split(' ')[1] : token;
+
 // Interceptor untuk menyisipkan token JWT secara otomatis
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token;
+    const token = sanitizeToken(useAuthStore.getState().token);
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -45,15 +48,24 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const { logout, setToken } = useAuthStore.getState();
+    const isRefreshRequest = originalRequest?.url?.includes(
+      '/auth/refresh-token'
+    );
 
     // Cek jika error adalah 401 dan bukan dari endpoint refresh-token itu sendiri
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isRefreshRequest
+    ) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers['Authorization'] = 'Bearer ' + token;
+            originalRequest.headers['Authorization'] =
+              'Bearer ' + sanitizeToken(token);
             return axiosInstance(originalRequest);
           })
           .catch((err) => {
@@ -66,7 +78,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         const response = await authService.refreshToken();
-        const newAccessToken = response.data.token;
+        const newAccessToken = sanitizeToken(response.data.token);
 
         setToken(newAccessToken);
 

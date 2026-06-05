@@ -24,7 +24,13 @@ const DashboardPage = React.lazy(() => import('./pages/DashboardPage.jsx'));
 const ProfilePage = React.lazy(() => import('./pages/ProfilePage.jsx'));
 const MyProfilePage = React.lazy(() => import('./pages/MyProfilePage.jsx'));
 const EditProfilePage = React.lazy(() => import('./pages/EditProfilePage.jsx'));
+const ChangePasswordPage = React.lazy(() =>
+  import('./pages/ChangePasswordPage.jsx')
+);
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage.jsx'));
+const ResetPasswordPage = React.lazy(() =>
+  import('./pages/ResetPasswordPage.jsx')
+);
 
 // Halaman About dan Contact
 const AboutPage = React.lazy(() => import('./pages/AboutPage.jsx'));
@@ -89,6 +95,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/profile/:userSlug" element={<ProfilePage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
           {/* Rute Terproteksi */}
           <Route element={<ProtectedRoute />}>
@@ -102,13 +109,14 @@ function App() {
               path="/learn/:courseSlug/certificate"
               element={<CertificatePage />}
             />
-
             {/* --- Rute Baru Ditambahkan --- */}
-            <Route path="/profile" element={<MyProfilePage />} />
-            <Route path="/profile/edit" element={<EditProfilePage />} />
+            <Route path="/profile" element={<ProtectedRoute />}>
+              <Route index element={<MyProfilePage />} />
+              <Route path="edit" element={<EditProfilePage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
+            </Route>
             <Route path="/settings" element={<SettingsPage />} />
             {/* ------------------------- */}
-
             {/* Rute Khusus Admin */}
             <Route
               path="/admin"
@@ -135,7 +143,6 @@ function App() {
               />
               <Route path="categories" element={<CategoryManagementPage />} />
             </Route>
-
             {/* Rute Khusus Instruktur */}
             <Route
               path="/instructor"

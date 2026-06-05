@@ -6,9 +6,10 @@ import useAuthStore from '/src/store/authStore.js';
 import useToastStore from '/src/store/toastStore.js';
 import { useUpdateUser } from '/src/hooks/useAdmin.js';
 import { ArrowLeft, User, Mail, Save } from 'lucide-react';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 const EditProfilePage = () => {
-  const { user, updateUser: updateUserInStore } = useAuthStore();
+  const { user } = useAuthStore();
   const { success, error } = useToastStore();
   const navigate = useNavigate();
 
@@ -53,9 +54,7 @@ const EditProfilePage = () => {
           navigate('/profile');
         },
         onError: (err) => {
-          const errorMessage =
-            err.response?.data?.error || 'Gagal memperbarui profil.';
-          error(errorMessage, {
+          error(getApiErrorMessage(err, 'Gagal memperbarui profil.'), {
             title: 'Update Gagal',
           });
         },

@@ -1,7 +1,6 @@
-import React, { createContext } from 'react';
+import React from 'react';
 import { useTheme } from '../hooks/useTheme';
-
-export const ThemeContext = createContext();
+import { ThemeContext } from './themeContextValue';
 
 export const ThemeProvider = ({ children }) => {
   const { theme, toggleTheme } = useTheme();

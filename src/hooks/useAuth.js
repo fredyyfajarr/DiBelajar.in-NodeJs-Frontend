@@ -66,3 +66,27 @@ export const useRegister = () => {
     },
   });
 };
+
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: authService.forgotPassword,
+  });
+};
+
+export const useResetPassword = () => {
+  const navigate = useNavigate();
+  const { login: loginToStore } = useAuthStore();
+
+  return useMutation({
+    mutationFn: authService.resetPassword,
+    onSuccess: (response) => {
+      const { data: user, token } = response.data;
+
+      if (user && token) {
+        loginToStore(user, token);
+      }
+
+      navigate('/');
+    },
+  });
+};

@@ -3,6 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useLogin } from '../hooks/useAuth';
 import useModalStore from '../store/modalStore';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 const LoginPage = () => {
   const {
@@ -110,7 +111,7 @@ const LoginPage = () => {
 
         {isError && (
           <p className="text-red-500 text-center text-sm">
-            {error.response?.data?.error || 'Login gagal!'}
+            {getApiErrorMessage(error, 'Login gagal!')}
           </p>
         )}
       </form>

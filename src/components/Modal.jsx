@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 // src/components/Modal.jsx
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

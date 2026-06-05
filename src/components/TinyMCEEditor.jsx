@@ -11,7 +11,7 @@ const TinyMCEEditor = ({
 }) => {
   const editorRef = useRef(null);
 
-  const handleEditorChange = (content, editor) => {
+  const handleEditorChange = (content) => {
     if (onChange) {
       onChange(content);
     }
@@ -21,7 +21,7 @@ const TinyMCEEditor = ({
     <div className={className}>
       <Editor
         apiKey='tg54ep9jwj8qr0zt9zf7yvdjyx83sye1uud5v2ctb7ylq1jb'
-        onInit={(evt, editor) => editorRef.current = editor}
+        onInit={(_evt, editor) => editorRef.current = editor}
         value={value || ''}
         onEditorChange={handleEditorChange}
         disabled={disabled}
@@ -56,7 +56,7 @@ const TinyMCEEditor = ({
           image_title: true,
           image_description: true,
           file_picker_types: 'image',
-          file_picker_callback: function (cb, value, meta) {
+          file_picker_callback: function (cb, _value, _meta) {
             var input = document.createElement('input');
             input.setAttribute('type', 'file');
             input.setAttribute('accept', 'image/*');

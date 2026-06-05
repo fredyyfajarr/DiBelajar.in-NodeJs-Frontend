@@ -1,7 +1,8 @@
 // src/pages/ForgotPasswordPage.jsx
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-// Kita akan buat hook `useForgotPassword` nanti
+import { useForgotPassword } from '../hooks/useAuth';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 const ForgotPasswordPage = () => {
   const {
@@ -10,14 +11,13 @@ const ForgotPasswordPage = () => {
     formState: { errors },
   } = useForm();
   const [isSuccess, setIsSuccess] = useState(false);
-  // const { mutate: requestReset, isPending } = useForgotPassword();
+  const { mutate: requestReset, isPending, isError, error } =
+    useForgotPassword();
 
   const onSubmit = (data) => {
-    // requestReset(data, {
-    //   onSuccess: () => setIsSuccess(true)
-    // });
-    console.log('Minta reset untuk email:', data.email); // Placeholder
-    setIsSuccess(true); // Placeholder
+    requestReset(data, {
+      onSuccess: () => setIsSuccess(true),
+    });
   };
 
   if (isSuccess) {
@@ -57,11 +57,15 @@ const ForgotPasswordPage = () => {
         <button
           type="submit"
           className="w-full bg-primary text-white py-2 rounded-lg font-semibold"
-          // disabled={isPending}
+          disabled={isPending}
         >
-          {/* {isPending ? 'Mengirim...' : 'Kirim Link Reset'} */}
-          Kirim Link Reset
+          {isPending ? 'Mengirim...' : 'Kirim Link Reset'}
         </button>
+        {isError && (
+          <p className="text-red-500 text-center text-sm">
+            {getApiErrorMessage(error, 'Gagal mengirim link reset.')}
+          </p>
+        )}
       </form>
     </div>
   );

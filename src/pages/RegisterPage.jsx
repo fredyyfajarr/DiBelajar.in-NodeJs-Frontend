@@ -3,6 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useRegister } from '../hooks/useAuth';
 import useModalStore from '../store/modalStore';
+import { getApiErrorMessage } from '/src/utils/apiError.js';
 
 const RegisterPage = () => {
   const {
@@ -136,7 +137,7 @@ const RegisterPage = () => {
 
         {isError && (
           <p className="text-red-500 text-center text-sm">
-            {error.response?.data?.error || 'Registrasi gagal!'}
+            {getApiErrorMessage(error, 'Registrasi gagal!')}
           </p>
         )}
       </form>

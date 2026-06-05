@@ -61,7 +61,7 @@ export const useUpdateUser = () => {
         updateUserInStore(updatedUser);
       }
     },
-    onError: (error) => {
+    onError: () => {
       // console.error('HOOK: Update user mutation failed:', error.response);
     },
   });
