@@ -8,6 +8,18 @@ const getMyEnrollments = (userId) => {
   return axiosInstance.get(`/users/${userId}/enrollments`);
 };
 
+const getMyAssignments = (userId) => {
+  return axiosInstance.get(`/users/${userId}/assignments`);
+};
+
+const getMyTestResults = (userId) => {
+  return axiosInstance.get(`/users/${userId}/tests`);
+};
+
+const getMyForumPosts = (userId) => {
+  return axiosInstance.get(`/users/${userId}/forum/posts`);
+};
+
 const submitAssignment = ({ courseId, materialId, formData }) => {
   return axiosInstance.post(
     `/courses/${courseId}/materials/${materialId}/assignments`,
@@ -78,6 +90,9 @@ const markMaterialAsComplete = (materialId) => {
 export default {
   enrollInCourse,
   getMyEnrollments,
+  getMyAssignments,
+  getMyTestResults,
+  getMyForumPosts,
   submitAssignment,
   submitTestResult,
   getForumPosts,

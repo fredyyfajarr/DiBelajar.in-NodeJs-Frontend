@@ -4,9 +4,10 @@ import useModalStore from '/src/store/modalStore.js';
 import useAuthStore from '/src/store/authStore.js';
 import useToastStore from '/src/store/toastStore.js';
 import authService from '/src/api/authService.js';
+import NotificationDropdown from '/src/components/NotificationDropdown.jsx';
 import { ThemeContext } from '/src/context/themeContextValue.js';
 import { getDashboardPath } from '../utils/getDashboardPath';
-import { Sun, Moon, LogOut, Search, User, Menu, X, Home, BookOpen, Settings, ChevronDown } from 'lucide-react';
+import { Sun, Moon, LogOut, Search, User, Menu, X, Home, BookOpen, Settings, ChevronDown, Activity } from 'lucide-react';
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,6 +98,19 @@ const Navbar = () => {
         closeMenu();
       }
     },
+    ...(user?.role === 'student'
+      ? [
+          {
+            label: 'Aktivitas',
+            icon: Activity,
+            path: '/student-activity',
+            action: () => {
+              navigate('/student-activity');
+              closeMenu();
+            },
+          },
+        ]
+      : []),
     {
       label: 'Tentang',
       icon: User,
@@ -227,6 +241,8 @@ const Navbar = () => {
               {/* Authentication Section */}
               {isAuthenticated ? (
                 <div className="flex items-center space-x-2">
+                  <NotificationDropdown />
+
                   {/* Desktop User Menu */}
                   <div className="hidden sm:flex items-center space-x-3">
                     {/* User Dropdown */}
@@ -267,6 +283,16 @@ const Navbar = () => {
                               <User className="h-4 w-4" />
                               <span>Profile</span>
                             </Link>
+                            {user?.role === 'student' && (
+                              <Link
+                                to="/student-activity"
+                                onClick={closeDropdown}
+                                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary"
+                              >
+                                <Activity className="h-4 w-4" />
+                                <span>Riwayat Aktivitas</span>
+                              </Link>
+                            )}
                             <Link
                               to="/settings"
                               onClick={closeDropdown}

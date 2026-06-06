@@ -80,10 +80,19 @@ export const useDeleteUser = () => {
 };
 
 // === HOOKS KURSUS (Tambahkan Ini) ===
-export const useAdminCourses = (params) => {
+export const useAdminCourses = (params, options = {}) => {
   return useQuery({
     queryKey: ['admin', 'courses', params],
     queryFn: () => adminService.getAllCourses(params),
+    enabled: options.enabled ?? true,
+  });
+};
+
+export const useInstructorCourses = (params, options = {}) => {
+  return useQuery({
+    queryKey: ['instructor', 'courses', params],
+    queryFn: () => adminService.getInstructorCourses(params),
+    enabled: options.enabled ?? true,
   });
 };
 
@@ -344,6 +353,16 @@ export const useMarkNotificationAsRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: notificationService.markNotificationAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+};
+
+export const useMarkAllNotificationsAsRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: notificationService.markAllNotificationsAsRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },

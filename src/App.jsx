@@ -71,6 +71,9 @@ const StudentProgressPage = React.lazy(() =>
 const StudentDashboardPage = React.lazy(() =>
   import('./pages/student/StudentDashboardPage.jsx')
 );
+const StudentActivityPage = React.lazy(() =>
+  import('./pages/student/StudentActivityPage.jsx')
+);
 const LearningPage = React.lazy(() =>
   import('./pages/student/LearningPage.jsx')
 );
@@ -103,6 +106,10 @@ function App() {
             <Route
               path="/student-dashboard"
               element={<StudentDashboardPage />}
+            />
+            <Route
+              path="/student-activity"
+              element={<StudentActivityPage />}
             />
             <Route path="/learn/:courseSlug" element={<LearningPage />} />
             <Route

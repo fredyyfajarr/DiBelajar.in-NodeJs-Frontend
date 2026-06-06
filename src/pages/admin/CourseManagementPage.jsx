@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { useAdminCourses, useDeleteCourse } from '/src/hooks/useAdmin.js';
+import {
+  useAdminCourses,
+  useDeleteCourse,
+  useInstructorCourses,
+} from '/src/hooks/useAdmin.js';
 import useAuthStore from '/src/store/authStore.js';
 import useToastStore from '/src/store/toastStore.js';
 import { useDebounce } from '/src/hooks/useDebounce.js';
@@ -26,11 +30,22 @@ const CourseManagementPage = () => {
   const [viewMode, setViewMode] = useState('grid');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const { data: response, isLoading } = useAdminCourses({
+  const courseQueryParams = {
     page,
     limit: 10,
     keyword: debouncedSearchTerm,
+  };
+  const isInstructor = user?.role === 'instructor';
+  const adminCoursesQuery = useAdminCourses(courseQueryParams, {
+    enabled: user?.role === 'admin',
   });
+  const instructorCoursesQuery = useInstructorCourses(courseQueryParams, {
+    enabled: isInstructor,
+  });
+  const activeCoursesQuery = isInstructor
+    ? instructorCoursesQuery
+    : adminCoursesQuery;
+  const { data: response, isLoading } = activeCoursesQuery;
 
   const { mutate: deleteCourse } = useDeleteCourse();
 

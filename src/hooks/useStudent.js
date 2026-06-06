@@ -31,6 +31,30 @@ export const useMyEnrollments = (userId) => {
   });
 };
 
+export const useMyAssignments = (userId) => {
+  return useQuery({
+    queryKey: ['my-assignments', userId],
+    queryFn: () => studentService.getMyAssignments(userId),
+    enabled: !!userId,
+  });
+};
+
+export const useMyTestResults = (userId) => {
+  return useQuery({
+    queryKey: ['my-test-results', userId],
+    queryFn: () => studentService.getMyTestResults(userId),
+    enabled: !!userId,
+  });
+};
+
+export const useMyForumPosts = (userId) => {
+  return useQuery({
+    queryKey: ['my-forum-posts', userId],
+    queryFn: () => studentService.getMyForumPosts(userId),
+    enabled: !!userId,
+  });
+};
+
 export const useSubmitAssignment = () => {
   const queryClient = useQueryClient();
 
