@@ -17,7 +17,7 @@ import useAuthStore from '/src/store/authStore.js';
 const getCourseProgress = (enrollment) => {
   const progressItems = enrollment.progress || [];
   const completed = progressItems.filter((item) => item.isCompleted).length;
-  const total = progressItems.length;
+  const total = enrollment.courseId?.materialCount || progressItems.length;
 
   return {
     completed,

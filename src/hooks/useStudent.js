@@ -223,13 +223,3 @@ export const useDeleteReview = () => {
   });
 };
 
-export const useCompleteMaterial = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: studentService.markMaterialAsComplete,
-    onSuccess: () => {
-      // Invalidate query enrollment agar data progress di-refetch
-      queryClient.invalidateQueries(['studentEnrollments']);
-    },
-  });
-};

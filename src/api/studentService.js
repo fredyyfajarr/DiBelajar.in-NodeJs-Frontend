@@ -83,10 +83,6 @@ const deleteReview = (courseSlug) => {
   return axiosInstance.delete(`/courses/${courseSlug}/reviews/my`);
 };
 
-const markMaterialAsComplete = (materialId) => {
-  return axiosInstance.post(`/materials/${materialId}/complete`);
-};
-
 export default {
   enrollInCourse,
   getMyEnrollments,
@@ -104,5 +100,4 @@ export default {
   getMyReview,
   updateReview,
   deleteReview,
-  markMaterialAsComplete,
 };

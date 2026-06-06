@@ -1,7 +1,17 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import {
+  Award,
+  BookOpen,
+  CheckCircle,
+  ChevronLeft,
+  FileText,
+  MessageCircle,
+  Play,
+} from 'lucide-react';
+import ForumModal from '../../components/ForumModal.jsx';
+import TestModal from '../../components/TestModal.jsx';
+import SubmissionModal from '/src/components/SubmissionModal.jsx';
 import { useCourseDetail } from '/src/hooks/useCourses.js';
 import { useUpdateProgress } from '/src/hooks/useStudent.js';
 import useToastStore from '/src/store/toastStore.js';
@@ -10,699 +20,373 @@ import {
   getMaterialProgress,
   getMaterialProgressState,
 } from '/src/utils/learningProgress.js';
-import SubmissionModal from '/src/components/SubmissionModal.jsx';
-import TestModal from '../../components/TestModal.jsx';
-import ForumModal from '../../components/ForumModal.jsx';
-import {
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  Circle,
-  Play,
-  FileText,
-  MessageCircle,
-  Award,
-  Clock,
-  Users,
-  BookOpen,
-  Menu,
-  X,
-  List,
-  Activity,
-} from 'lucide-react';
 
-// Progress Step Component
-const ProgressStep = ({
-  icon: Icon,
-  label,
-  isCompleted,
-  isDisabled,
-  onClick,
-  buttonText,
-  count,
-}) => {
-  return (
-    <div className="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
-      <div className="flex items-center space-x-3">
-        <div
-          className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            isCompleted
-              ? 'bg-green-500 text-white'
-              : 'bg-gray-200 text-gray-400'
-          }`}
-        >
-          {isCompleted ? (
-            <CheckCircle className="w-4 h-4" />
-          ) : (
-            <Icon className="w-4 h-4" />
-          )}
-        </div>
-        <span
-          className={`text-sm font-medium ${
-            isCompleted ? 'text-gray-500 line-through' : 'text-gray-700'
-          }`}
-        >
-          {label}
-          {count && ` ${count}`}
-        </span>
-      </div>
-      {!isCompleted && (
-        <button
-          onClick={onClick}
-          disabled={isDisabled}
-          className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {buttonText}
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Slide Menu Component
-const SlideMenu = ({ isOpen, onClose, children, title, side = 'left' }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={onClose}
-          />
-
-          {/* Slide Menu */}
-          <motion.div
-            initial={{ x: side === 'left' ? '-100%' : '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: side === 'left' ? '-100%' : '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
-            className={`fixed top-0 ${
-              side === 'left' ? 'left-0' : 'right-0'
-            } h-full w-80 max-w-[85vw] bg-white shadow-xl z-50 overflow-y-auto`}
-          >
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">{title}</h2>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4">{children}</div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-};
-
-// Material Item Component
-const MaterialItem = ({
-  material,
-  index,
-  onButtonClick,
-  progress,
-  courseId,
-  courseSlug,
-  onToggleActivity,
-}) => {
-  const {
-    hasTest,
-    testCompleted,
-    assignmentSubmitted,
-    forumPostCount,
-    materialCompleted,
-    canCompleteMaterial,
-    progressPercentage,
-  } = getMaterialProgressState(material, progress);
-
-  const { mutate: updateProgress } = useUpdateProgress();
-  const { confirm, success, error } = useToastStore();
-
-  const handleCompleteMaterial = () => {
-    confirm('Apakah Anda yakin ingin menyelesaikan materi ini?', {
-      title: 'Konfirmasi Penyelesaian',
-      actions: [
-        {
-          label: 'Batal',
-          handler: () => {},
-          primary: false,
-        },
-        {
-          label: 'Selesaikan',
-          handler: () => {
-            updateProgress(
-              {
-                courseId: courseId,
-                materialId: material._id,
-                step: 'completion',
-                courseSlug,
-              },
-              {
-                onSuccess: () => {
-                  success('Materi berhasil diselesaikan!');
-                },
-                onError: () => {
-                  error('Gagal menyelesaikan materi');
-                },
-              }
-            );
-          },
-          primary: true,
-        },
-      ],
-    });
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  };
-
-  return (
-    <motion.div
-      variants={cardVariants}
-      className={`bg-white rounded-xl border ${
-        materialCompleted ? 'border-green-200 bg-green-50' : 'border-gray-200'
-      } overflow-hidden shadow-sm hover:shadow-md transition-shadow`}
+const StepStatus = ({ icon, label, done, detail }) => (
+  <div className="flex items-start gap-3 rounded-md border border-gray-200 bg-white p-3">
+    <div
+      className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-md ${
+        done ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'
+      }`}
     >
-      {/* Header */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                materialCompleted
-                  ? 'bg-green-500 text-white'
-                  : 'bg-blue-100 text-blue-600'
-              }`}
-            >
-              {materialCompleted ? (
-                <CheckCircle className="w-6 h-6" />
-              ) : (
-                index + 1
-              )}
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                {material.title}
-              </h3>
-              <p className="text-sm text-gray-500">Modul {index + 1}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <div
-                className={`text-sm font-medium ${
-                  materialCompleted ? 'text-green-600' : 'text-blue-600'
-                }`}
-              >
-                {materialCompleted
-                  ? 'Selesai'
-                  : `${Math.round(progressPercentage)}%`}
-              </div>
-              <div className="w-20 h-2 bg-gray-200 rounded-full mt-1">
-                <div
-                  className={`h-full rounded-full ${
-                    materialCompleted ? 'bg-green-500' : 'bg-blue-500'
-                  } transition-all duration-500`}
-                  style={{ width: `${progressPercentage}%` }}
-                />
-              </div>
-            </div>
-            <button
-              onClick={() => onToggleActivity(material)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              title="Lihat Aktivitas Pembelajaran"
-            >
-              <BookOpen className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">Aktivitas</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {done
+        ? <CheckCircle className="h-4 w-4" />
+        : React.createElement(icon, { className: 'h-4 w-4' })}
+    </div>
+    <div>
+      <p className="text-sm font-semibold text-gray-900">{label}</p>
+      <p className="mt-0.5 text-xs text-gray-500">{detail}</p>
+    </div>
+  </div>
+);
 
-      {/* Content - Full Width */}
-      <div className="p-6">
-        <div
-          className="text-gray-700 leading-relaxed prose prose-base max-w-none mb-8"
-          dangerouslySetInnerHTML={{ __html: material.description }}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-// Komponen utama LearningPage
 const LearningPage = () => {
   const { courseSlug } = useParams();
   const { data, isLoading, isError } = useCourseDetail(courseSlug);
+  const [selectedMaterialId, setSelectedMaterialId] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
-  const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
-  const [isActivityMenuOpen, setIsActivityMenuOpen] = useState(false);
-  const [selectedMaterialForActivity, setSelectedMaterialForActivity] =
-    useState(null);
+  const { mutate: updateProgress } = useUpdateProgress();
+  const { confirm, success, error } = useToastStore();
 
-  const handleOpenModal = (modalType, material) => {
-    setSelectedMaterial(material);
-    setActiveModal(modalType);
-  };
+  const materials = useMemo(() => data?.materials || [], [data?.materials]);
+  const course = data?.course;
+  const enrollment = data?.enrollment;
 
-  const handleToggleActivity = (material) => {
-    setSelectedMaterialForActivity(material);
-    setIsActivityMenuOpen(true);
-  };
+  const selectedMaterial = useMemo(() => {
+    if (!materials.length) return null;
+    return (
+      materials.find((material) => material._id === selectedMaterialId) ||
+      materials[0]
+    );
+  }, [materials, selectedMaterialId]);
 
-  const handleCloseModal = () => {
-    setActiveModal(null);
-    setSelectedMaterial(null);
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.5, staggerChildren: 0.1 },
-    },
-  };
+  const selectedProgress = getMaterialProgress(
+    enrollment?.progress,
+    selectedMaterial?._id
+  );
+  const selectedState = getMaterialProgressState(
+    selectedMaterial,
+    selectedProgress
+  );
+  const completedMaterials =
+    enrollment?.progress?.filter((progress) => progress.isCompleted).length || 0;
+  const courseProgress =
+    materials.length > 0
+      ? Math.round((completedMaterials / materials.length) * 100)
+      : 0;
+  const allMaterialsCompleted =
+    materials.length > 0 && completedMaterials === materials.length;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        Memuat kursus...
+      <div className="flex min-h-screen items-center justify-center text-gray-600">
+        Memuat ruang belajar...
       </div>
     );
   }
-  if (isError) {
+
+  if (isError || !course) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-red-500">
+      <div className="flex min-h-screen items-center justify-center text-red-600">
         Gagal memuat kursus.
       </div>
     );
   }
 
-  const { course, materials, enrollment } = data;
-  const completedMaterials =
-    enrollment?.progress.filter((p) => p.isCompleted).length || 0;
-  const totalMaterials = materials.length;
-  const courseProgress =
-    totalMaterials > 0
-      ? Math.round((completedMaterials / totalMaterials) * 100)
-      : 0;
-  const allMaterialsCompleted =
-    materials.length > 0 && completedMaterials === totalMaterials;
-  const selectedActivityProgress = getMaterialProgress(
-    enrollment?.progress,
-    selectedMaterialForActivity?._id
-  );
-  const selectedActivityState = getMaterialProgressState(
-    selectedMaterialForActivity,
-    selectedActivityProgress
-  );
+  const openModal = (modalType) => {
+    setActiveModal(modalType);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
+
+  const handleCompleteMaterial = () => {
+    if (!selectedMaterial) return;
+
+    confirm('Apakah Anda yakin ingin menyelesaikan materi ini?', {
+      title: 'Konfirmasi Penyelesaian',
+      actions: [
+        { label: 'Batal', handler: () => {}, primary: false },
+        {
+          label: 'Selesaikan',
+          primary: true,
+          handler: () => {
+            updateProgress(
+              {
+                courseId: course._id,
+                materialId: selectedMaterial._id,
+                step: 'completion',
+                courseSlug,
+              },
+              {
+                onSuccess: () => success('Materi berhasil diselesaikan!'),
+                onError: () => error('Gagal menyelesaikan materi'),
+              }
+            );
+          },
+        },
+      ],
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Menu Buttons - Full Width */}
-      <div className="bg-white border-b border-gray-200 w-full">
-        <div className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 max-w-none">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-6">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="container mx-auto px-4 py-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
               <Link
-                to="/courses"
-                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+                to="/student-dashboard"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900"
               >
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                Kembali
+                <ChevronLeft className="h-4 w-4" />
+                Dashboard
               </Link>
-              <div className="h-5 w-px bg-gray-300" />
-              <h1 className="text-xl font-semibold text-gray-900 truncate">
+              <h1 className="mt-2 text-2xl font-bold text-gray-900">
                 {course.title}
               </h1>
-            </div>
-
-            {/* Menu Buttons */}
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => setIsModuleMenuOpen(true)}
-                className="flex items-center px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <List className="w-4 h-4 mr-2" />
-                Daftar Modul
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Full Width with better spacing */}
-      <motion.div
-        className="w-full px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Course Header - Full Width */}
-        <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                {course.title}
-              </h1>
-              <p className="text-lg text-gray-600 mb-6">
-                Oleh {course.instructorId?.name}
+              <p className="mt-1 text-sm text-gray-500">
+                {completedMaterials}/{materials.length} materi selesai
               </p>
-              <div className="flex items-center space-x-8 text-base text-gray-500">
-                <div className="flex items-center">
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  <span>{totalMaterials} modul</span>
-                </div>
-              </div>
             </div>
-            <div className="text-right ml-8">
-              <div className="text-sm text-gray-500 mb-1">Progress Anda</div>
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {courseProgress}%
+            <div className="min-w-64">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Progress kursus</span>
+                <span className="font-semibold text-gray-900">
+                  {courseProgress}%
+                </span>
               </div>
-              <div className="w-40 h-3 bg-gray-200 rounded-full">
+              <div className="mt-2 h-2 rounded-full bg-gray-100">
                 <div
-                  className="h-full bg-green-500 rounded-full transition-all duration-500"
+                  className="h-full rounded-full bg-primary transition-all"
                   style={{ width: `${courseProgress}%` }}
                 />
               </div>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Materials List - Full Width with better spacing */}
-        <div className="space-y-8">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Materi Pembelajaran
+      <main className="container mx-auto grid grid-cols-1 gap-6 px-4 py-6 xl:grid-cols-[280px_1fr_340px]">
+        <aside className="rounded-lg border border-gray-200 bg-white p-4 xl:sticky xl:top-20 xl:h-[calc(100vh-7rem)] xl:overflow-y-auto">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Modul
           </h2>
-          {materials.map((material, index) => {
-            const materialProgress = getMaterialProgress(
-              enrollment?.progress,
-              material._id
-            );
-            return (
-              <MaterialItem
-                key={material._id}
-                material={material}
-                index={index}
-                onButtonClick={handleOpenModal}
-                progress={materialProgress}
-                courseId={course._id}
-                courseSlug={courseSlug}
-                onToggleActivity={handleToggleActivity}
-              />
-            );
-          })}
-        </div>
+          <div className="mt-4 space-y-2">
+            {materials.map((material, index) => {
+              const progress = getMaterialProgress(
+                enrollment?.progress,
+                material._id
+              );
+              const isActive = selectedMaterial?._id === material._id;
+              const isCompleted = progress?.isCompleted || false;
 
-        {/* Completion Certificate */}
-        {allMaterialsCompleted && (
-          <motion.div
-            className="mt-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-8 text-white text-center"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Award className="w-16 h-16 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold mb-3">
-              🎉 Selamat! Anda Telah Menyelesaikan Kursus
-            </h2>
-            <p className="text-blue-100 mb-6 text-lg">
-              Anda sekarang berhak untuk mengunduh sertifikat kelulusan
-            </p>
-            <Link
-              to={`/learn/${courseSlug}/certificate`}
-              className="inline-block bg-white text-blue-600 font-semibold px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Lihat & Cetak Sertifikat
-            </Link>
-          </motion.div>
-        )}
-      </motion.div>
-
-      {/* Slide Menu - Module List */}
-      <SlideMenu
-        isOpen={isModuleMenuOpen}
-        onClose={() => setIsModuleMenuOpen(false)}
-        title="Daftar Modul"
-        side="left"
-      >
-        <div className="space-y-2">
-          <div className="mb-4">
-            <div className="flex items-center text-sm text-gray-600 mb-2">
-              <span>{courseProgress}% Selesai</span>
-            </div>
-            <div className="w-full h-2 bg-gray-200 rounded-full">
-              <div
-                className="h-full bg-green-500 rounded-full transition-all duration-300"
-                style={{ width: `${courseProgress}%` }}
-              />
-            </div>
-          </div>
-          {materials.map((material, index) => {
-            const progress = getMaterialProgress(
-              enrollment?.progress,
-              material._id
-            );
-            const isCompleted = progress?.isCompleted || false;
-            return (
-              <div
-                key={material._id}
-                className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                  isCompleted
-                    ? 'bg-green-50 border border-green-200'
-                    : 'hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      isCompleted
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle className="w-4 h-4" />
-                    ) : (
-                      index + 1
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {material.title}
-                    </p>
-                    <p className="text-xs text-gray-500">Modul {index + 1}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </SlideMenu>
-
-      {/* Slide Menu - Activity Details */}
-      <SlideMenu
-        isOpen={isActivityMenuOpen}
-        onClose={() => {
-          setIsActivityMenuOpen(false);
-          setSelectedMaterialForActivity(null);
-        }}
-        title={
-          selectedMaterialForActivity
-            ? `Aktivitas: ${selectedMaterialForActivity.title}`
-            : 'Aktivitas Pembelajaran'
-        }
-        side="right"
-      >
-        {selectedMaterialForActivity && (
-          <div className="space-y-4">
-            {/* Quiz Activity */}
-            {selectedActivityState.hasTest && (
-                <div className="bg-white p-4 rounded-lg border shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          selectedActivityState.testCompleted
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gray-200 text-gray-400'
-                        }`}
-                      >
-                        {selectedActivityState.testCompleted ? (
-                          <CheckCircle className="w-5 h-5" />
-                        ) : (
-                          <Play className="w-5 h-5" />
-                        )}
-                      </div>
-                      <span className="font-medium text-gray-900">
-                        Kerjakan Kuis
-                      </span>
-                    </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        selectedActivityState.testCompleted
-                          ? 'bg-green-100 text-green-800'
+              return (
+                <button
+                  key={material._id}
+                  type="button"
+                  onClick={() => setSelectedMaterialId(material._id)}
+                  className={`w-full rounded-md border p-3 text-left transition ${
+                    isActive
+                      ? 'border-primary bg-primary/5'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-xs font-bold ${
+                        isCompleted
+                          ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {selectedActivityState.testCompleted ? 'Selesai' : 'Belum'}
-                    </span>
+                      {isCompleted ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 text-sm font-semibold text-gray-900">
+                        {material.title}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {isCompleted ? 'Selesai' : 'Belum selesai'}
+                      </p>
+                    </div>
                   </div>
-                  {!selectedActivityState.testCompleted && (
-                    <button
-                      onClick={() => {
-                        handleOpenModal('test', selectedMaterialForActivity);
-                        setIsActivityMenuOpen(false);
-                      }}
-                      className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Mulai Kuis
-                    </button>
-                  )}
-                </div>
-              )}
-
-            {/* Assignment Activity */}
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      selectedActivityState.assignmentSubmitted
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-400'
-                    }`}
-                  >
-                    {selectedActivityState.assignmentSubmitted ? (
-                      <CheckCircle className="w-5 h-5" />
-                    ) : (
-                      <FileText className="w-5 h-5" />
-                    )}
-                  </div>
-                  <span className="font-medium text-gray-900">
-                    Submit Tugas
-                  </span>
-                </div>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full ${
-                    selectedActivityState.assignmentSubmitted
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  {selectedActivityState.assignmentSubmitted
-                    ? 'Selesai'
-                    : 'Belum'}
-                </span>
-              </div>
-              {!selectedActivityState.assignmentSubmitted && (
-                <button
-                  onClick={() => {
-                    handleOpenModal('assignment', selectedMaterialForActivity);
-                    setIsActivityMenuOpen(false);
-                  }}
-                  disabled={
-                    selectedActivityState.hasTest &&
-                    !selectedActivityState.testCompleted
-                  }
-                  className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Kumpulkan Tugas
                 </button>
-              )}
+              );
+            })}
+          </div>
+        </aside>
+
+        <section className="rounded-lg border border-gray-200 bg-white">
+          <div className="border-b border-gray-200 p-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+              Materi pembelajaran
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-gray-900">
+              {selectedMaterial?.title}
+            </h2>
+          </div>
+          <div className="p-6">
+            <div
+              className="prose prose-gray max-w-none"
+              dangerouslySetInnerHTML={{
+                __html: selectedMaterial?.description || '',
+              }}
+            />
+          </div>
+        </section>
+
+        <aside className="space-y-4 xl:sticky xl:top-20 xl:h-fit">
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-gray-900">Aktivitas materi</h2>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
+                {selectedState.progressPercentage}%
+              </span>
+            </div>
+            <div className="mt-4 h-2 rounded-full bg-gray-100">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${selectedState.progressPercentage}%` }}
+              />
             </div>
 
-            {/* Forum Activity */}
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      selectedActivityState.forumCompleted
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-400'
-                    }`}
-                  >
-                    {selectedActivityState.forumCompleted ? (
-                      <CheckCircle className="w-5 h-5" />
-                    ) : (
-                      <MessageCircle className="w-5 h-5" />
-                    )}
-                  </div>
-                  <span className="font-medium text-gray-900">
-                    Forum Diskusi (
-                    {selectedActivityState.forumPostCount}/
-                    {REQUIRED_FORUM_POSTS})
-                  </span>
-                </div>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full ${
-                    selectedActivityState.forumCompleted
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  {selectedActivityState.forumCompleted ? 'Selesai' : 'Belum'}
-                </span>
-              </div>
-              {!selectedActivityState.forumCompleted && (
+            <div className="mt-5 space-y-3">
+              {selectedState.hasTest && (
+                <StepStatus
+                  icon={Play}
+                  label="Quiz"
+                  done={selectedState.testCompleted}
+                  detail={
+                    selectedState.testCompleted
+                      ? 'Quiz sudah dikerjakan'
+                      : 'Kerjakan quiz sebelum submit tugas'
+                  }
+                />
+              )}
+              <StepStatus
+                icon={FileText}
+                label="Tugas"
+                done={selectedState.assignmentSubmitted}
+                detail={
+                  selectedState.assignmentSubmitted
+                    ? 'Tugas sudah dikumpulkan'
+                    : 'Upload tugas untuk lanjut forum'
+                }
+              />
+              <StepStatus
+                icon={MessageCircle}
+                label="Forum"
+                done={selectedState.forumCompleted}
+                detail={`${selectedState.forumPostCount}/${REQUIRED_FORUM_POSTS} posting diskusi`}
+              />
+            </div>
+
+            <div className="mt-5 space-y-2">
+              {selectedState.hasTest && !selectedState.testCompleted && (
                 <button
-                  onClick={() => {
-                    handleOpenModal('forum', selectedMaterialForActivity);
-                    setIsActivityMenuOpen(false);
-                  }}
-                  disabled={!selectedActivityState.assignmentSubmitted}
-                  className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  type="button"
+                  onClick={() => openModal('test')}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
                 >
-                  Mulai Diskusi
+                  <Play className="h-4 w-4" />
+                  Mulai quiz
+                </button>
+              )}
+              {!selectedState.assignmentSubmitted && (
+                <button
+                  type="button"
+                  onClick={() => openModal('assignment')}
+                  disabled={
+                    selectedState.hasTest && !selectedState.testCompleted
+                  }
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <FileText className="h-4 w-4" />
+                  Kumpulkan tugas
+                </button>
+              )}
+              {!selectedState.forumCompleted && (
+                <button
+                  type="button"
+                  onClick={() => openModal('forum')}
+                  disabled={!selectedState.assignmentSubmitted}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Buka forum
+                </button>
+              )}
+              {!selectedState.materialCompleted && (
+                <button
+                  type="button"
+                  onClick={handleCompleteMaterial}
+                  disabled={!selectedState.canCompleteMaterial}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  Selesaikan materi
                 </button>
               )}
             </div>
           </div>
-        )}
-      </SlideMenu>
+
+          {allMaterialsCompleted && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-5">
+              <Award className="h-8 w-8 text-emerald-700" />
+              <h3 className="mt-3 font-semibold text-emerald-950">
+                Kursus selesai
+              </h3>
+              <p className="mt-1 text-sm text-emerald-800">
+                Anda sudah memenuhi syarat untuk mencetak sertifikat.
+              </p>
+              <Link
+                to={`/learn/${courseSlug}/certificate`}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+              >
+                Lihat sertifikat
+              </Link>
+            </div>
+          )}
+
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <div className="flex items-start gap-3">
+              <BookOpen className="mt-0.5 h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold text-gray-900">Tips belajar</h3>
+                <p className="mt-1 text-sm leading-6 text-gray-600">
+                  Baca materi, kerjakan aktivitas berurutan, lalu tandai materi
+                  selesai setelah semua requirement terpenuhi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </main>
 
       {selectedMaterial && (
         <>
           <SubmissionModal
             isOpen={activeModal === 'assignment'}
-            onClose={handleCloseModal}
+            onClose={closeModal}
             courseId={course._id}
             material={selectedMaterial}
             courseSlug={courseSlug}
           />
           <TestModal
             isOpen={activeModal === 'test'}
-            onClose={handleCloseModal}
+            onClose={closeModal}
             courseId={course._id}
             material={selectedMaterial}
             courseSlug={courseSlug}
           />
           <ForumModal
             isOpen={activeModal === 'forum'}
-            onClose={handleCloseModal}
+            onClose={closeModal}
             courseId={course._id}
             material={selectedMaterial}
             courseSlug={courseSlug}
