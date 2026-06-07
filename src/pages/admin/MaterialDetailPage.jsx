@@ -1,59 +1,116 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import {
+  CheckSquare,
+  ChevronLeft,
+  ExternalLink,
+  FileText,
+  MessageSquare,
+  Save,
+  Users,
+} from 'lucide-react';
+import {
+  useForumPosts,
+  useGradeSubmission,
+  useMaterialDetail,
   useSubmissions,
   useTestResults,
-  useForumPosts,
-  useMaterialDetail,
-  useGradeSubmission,
 } from '/src/hooks/useAdmin.js';
 import useAuthStore from '/src/store/authStore.js';
 import ForumModal from '/src/components/ForumModal.jsx';
-import { MessageSquare, CheckSquare, FileText } from 'lucide-react';
 
-const getResponseData = (response) =>
-  response?.data?.data || response?.data || [];
+const getResponseItems = (response) => {
+  const payload = response?.data?.data ?? response?.data ?? [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.data)) return payload.data;
+  return [];
+};
+
+const formatDateTime = (value) => {
+  if (!value) return '-';
+  return new Date(value).toLocaleString('id-ID', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+};
+
+const StatCard = ({ icon: Icon, label, value, detail }) => (
+  <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className="text-sm font-semibold text-gray-500">{label}</p>
+        <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
+        {detail && <p className="mt-1 text-xs text-gray-500">{detail}</p>}
+      </div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+        {React.createElement(Icon, { className: 'h-5 w-5' })}
+      </div>
+    </div>
+  </div>
+);
+
+const EmptyState = ({ children }) => (
+  <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
+    {children}
+  </div>
+);
 
 const SubmissionRow = ({ submission, courseId, materialId }) => {
   const [grade, setGrade] = useState(submission.grade ?? '');
   const [feedback, setFeedback] = useState(submission.feedback || '');
   const { mutate: gradeSubmission, isPending } = useGradeSubmission();
+  const numericGrade = Number(grade);
+  const isGradeValid =
+    grade !== '' &&
+    Number.isFinite(numericGrade) &&
+    numericGrade >= 0 &&
+    numericGrade <= 100;
 
   const handleSubmitGrade = (event) => {
     event.preventDefault();
+    if (!isGradeValid) return;
+
     gradeSubmission({
       courseId,
       materialId,
       submissionId: submission._id,
       gradeData: {
-        grade: Number(grade),
-        feedback,
+        grade: numericGrade,
+        feedback: feedback.trim(),
       },
     });
   };
 
   return (
-    <tr className="border-b last:border-0 hover:bg-gray-50 transition-colors duration-200 align-top">
-      <td className="p-3">{submission.userId?.name || 'N/A'}</td>
-      <td className="p-3">
-        {new Date(submission.submittedAt).toLocaleString()}
+    <tr className="align-top transition hover:bg-gray-50">
+      <td className="p-4">
+        <p className="font-semibold text-gray-900">
+          {submission.userId?.name || 'Siswa'}
+        </p>
+        <p className="mt-1 text-xs text-gray-500">
+          {submission.userId?.email || '-'}
+        </p>
       </td>
-      <td className="p-3">
+      <td className="p-4 text-sm text-gray-600">
+        {formatDateTime(submission.submittedAt)}
+      </td>
+      <td className="p-4">
         <a
           href={submission.submissionFileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
         >
-          Lihat File
+          Lihat file
+          <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </td>
-      <td className="p-3">
+      <td className="p-4">
         <span
-          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
             submission.status === 'graded'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-yellow-100 text-yellow-700'
+              ? 'bg-emerald-100 text-emerald-700'
+              : 'bg-amber-100 text-amber-700'
           }`}
         >
           {submission.status === 'graded' ? 'Sudah dinilai' : 'Menunggu nilai'}
@@ -64,158 +121,165 @@ const SubmissionRow = ({ submission, courseId, materialId }) => {
           </p>
         )}
       </td>
-      <td className="p-3">
-        <form onSubmit={handleSubmitGrade} className="space-y-2 min-w-64">
-          <input
-            type="number"
-            min="0"
-            max="100"
-            value={grade}
-            onChange={(event) => setGrade(event.target.value)}
-            className="w-24 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="0-100"
-            required
-          />
+      <td className="p-4">
+        <form onSubmit={handleSubmitGrade} className="min-w-72 space-y-2">
+          <div className="flex items-start gap-2">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={grade}
+              onChange={(event) => setGrade(event.target.value)}
+              className="w-24 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="0-100"
+              required
+            />
+            <button
+              type="submit"
+              disabled={isPending || !isGradeValid}
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              {isPending ? 'Menyimpan' : 'Simpan'}
+            </button>
+          </div>
           <textarea
             value={feedback}
             onChange={(event) => setFeedback(event.target.value)}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             rows="2"
-            placeholder="Feedback singkat"
+            maxLength="2000"
+            placeholder="Feedback untuk siswa"
           />
-          <button
-            type="submit"
-            disabled={isPending}
-            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white transition hover:bg-opacity-90 disabled:opacity-50"
-          >
-            {isPending ? 'Menyimpan...' : 'Simpan Nilai'}
-          </button>
+          {!isGradeValid && grade !== '' && (
+            <p className="text-xs font-semibold text-red-600">
+              Nilai harus berada di rentang 0-100.
+            </p>
+          )}
         </form>
       </td>
     </tr>
   );
 };
 
-const SubmissionsList = ({ data, isLoading, courseId, materialId }) => {
-  if (isLoading)
-    return (
-      <p className="text-center py-4 text-gray-600">Memuat daftar tugas...</p>
-    );
-  const submissions = getResponseData(data);
-  return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b border-gray-200">
-          <th className="text-left p-3 font-semibold text-gray-700">
-            Nama Siswa
-          </th>
-          <th className="text-left p-3 font-semibold text-gray-700">
-            Waktu Submit
-          </th>
-          <th className="text-left p-3 font-semibold text-gray-700">File</th>
-          <th className="text-left p-3 font-semibold text-gray-700">Status</th>
-          <th className="text-left p-3 font-semibold text-gray-700">
-            Penilaian
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {submissions.length > 0 ? (
-          submissions.map((sub) => (
-            <SubmissionRow
-              key={sub._id}
-              submission={sub}
-              courseId={courseId}
-              materialId={materialId}
-            />
-          ))
-        ) : (
-          <tr>
-            <td colSpan="5" className="text-center p-4 text-gray-600">
-              Belum ada tugas yang dikumpulkan.
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  );
-};
+const SubmissionsPanel = ({ data, isLoading, courseId, materialId }) => {
+  if (isLoading) {
+    return <EmptyState>Memuat daftar tugas...</EmptyState>;
+  }
 
-const TestResultsList = ({ data, isLoading }) => {
-  if (isLoading)
-    return (
-      <p className="text-center py-4 text-gray-600">Memuat hasil tes...</p>
-    );
-  const results = data?.data || [];
+  const submissions = getResponseItems(data);
+  if (submissions.length === 0) {
+    return <EmptyState>Belum ada tugas yang dikumpulkan.</EmptyState>;
+  }
+
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b border-gray-200">
-          <th className="text-left p-3 font-semibold text-gray-700">
-            Nama Siswa
-          </th>
-          <th className="text-left p-3 font-semibold text-gray-700">Skor</th>
-          <th className="text-left p-3 font-semibold text-gray-700">
-            Waktu Selesai
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {results.length > 0 ? (
-          results.map((res) => (
-            <tr
-              key={res._id}
-              className="border-b last:border-0 hover:bg-gray-50 transition-colors duration-200"
-            >
-              <td className="p-3">{res.userId?.name || 'N/A'}</td>
-              <td className="p-3 font-bold">{res.score}</td>
-              <td className="p-3">
-                {new Date(res.completeAt).toLocaleString()}
-              </td>
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <tr>
+              <th className="p-4">Siswa</th>
+              <th className="p-4">Waktu submit</th>
+              <th className="p-4">File</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Penilaian</th>
             </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="3" className="text-center p-4 text-gray-600">
-              Belum ada hasil tes.
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {submissions.map((submission) => (
+              <SubmissionRow
+                key={submission._id}
+                submission={submission}
+                courseId={courseId}
+                materialId={materialId}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
-const ForumPostsList = ({ data, isLoading }) => {
-  if (isLoading)
-    return (
-      <p className="text-center py-4 text-gray-600">
-        Memuat riwayat diskusi...
-      </p>
-    );
-  const posts = data?.data?.data || [];
+const TestResultsPanel = ({ data, isLoading }) => {
+  if (isLoading) {
+    return <EmptyState>Memuat hasil tes...</EmptyState>;
+  }
+
+  const results = getResponseItems(data);
+  if (results.length === 0) {
+    return <EmptyState>Belum ada hasil tes.</EmptyState>;
+  }
+
   return (
-    <div className="space-y-4 p-4">
-      {posts.length > 0 ? (
-        posts.map((post) => (
-          <div
-            key={post._id}
-            className="border border-gray-100 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-          >
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <tr>
+              <th className="p-4">Siswa</th>
+              <th className="p-4">Skor</th>
+              <th className="p-4">Waktu selesai</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {results.map((result) => (
+              <tr key={result._id} className="transition hover:bg-gray-50">
+                <td className="p-4">
+                  <p className="font-semibold text-gray-900">
+                    {result.userId?.name || 'Siswa'}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {result.userId?.email || '-'}
+                  </p>
+                </td>
+                <td className="p-4">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-sm font-bold text-primary">
+                    {result.score}
+                  </span>
+                </td>
+                <td className="p-4 text-sm text-gray-600">
+                  {formatDateTime(result.completeAt)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+const ForumPostsPanel = ({ data, isLoading }) => {
+  if (isLoading) {
+    return <EmptyState>Memuat riwayat diskusi...</EmptyState>;
+  }
+
+  const posts = getResponseItems(data);
+  if (posts.length === 0) {
+    return <EmptyState>Belum ada riwayat diskusi.</EmptyState>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {posts.map((post) => (
+        <article
+          key={post._id}
+          className="rounded-lg border border-gray-200 bg-white p-4"
+        >
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="font-semibold text-gray-900">
-              {post.userId?.name || 'N/A'}
+              {post.userId?.name || 'Siswa'}
             </p>
-            <p className="text-sm text-gray-600 mb-2">
-              {new Date(post.timestamp).toLocaleString()}
+            <p className="text-xs text-gray-500">
+              {formatDateTime(post.timestamp)}
             </p>
-            <p className="text-gray-800">{post.text}</p>
           </div>
-        ))
-      ) : (
-        <p className="text-center p-4 text-gray-600">
-          Belum ada riwayat diskusi.
-        </p>
-      )}
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+            {post.text}
+          </p>
+        </article>
+      ))}
     </div>
   );
 };
@@ -238,28 +302,71 @@ const MaterialDetailPage = () => {
     materialId
   );
 
-  const TABS = {
-    submissions: (
-      <SubmissionsList
-        data={submissionsData}
-        isLoading={submissionsLoading}
-        courseId={courseId}
-        materialId={materialId}
-      />
-    ),
-    testResults: (
-      <TestResultsList data={testResultsData} isLoading={testResultsLoading} />
-    ),
-    forumPosts: (
-      <ForumPostsList data={forumPostsData} isLoading={forumPostsLoading} />
-    ),
-  };
+  const material = materialDetail?.data?.data || materialDetail?.data;
+  const submissions = useMemo(
+    () => getResponseItems(submissionsData),
+    [submissionsData]
+  );
+  const testResults = useMemo(
+    () => getResponseItems(testResultsData),
+    [testResultsData]
+  );
+  const forumPosts = useMemo(
+    () => getResponseItems(forumPostsData),
+    [forumPostsData]
+  );
+  const gradedCount = submissions.filter(
+    (submission) => submission.status === 'graded'
+  ).length;
+  const averageScore =
+    testResults.length > 0
+      ? Math.round(
+          testResults.reduce((total, result) => total + (result.score || 0), 0) /
+            testResults.length
+        )
+      : 0;
 
-  const isLoading = isLoadingMaterial;
+  const tabs = [
+    {
+      id: 'submissions',
+      label: 'Tugas',
+      icon: FileText,
+      count: submissions.length,
+      content: (
+        <SubmissionsPanel
+          data={submissionsData}
+          isLoading={submissionsLoading}
+          courseId={courseId}
+          materialId={materialId}
+        />
+      ),
+    },
+    {
+      id: 'testResults',
+      label: 'Tes',
+      icon: CheckSquare,
+      count: testResults.length,
+      content: (
+        <TestResultsPanel
+          data={testResultsData}
+          isLoading={testResultsLoading}
+        />
+      ),
+    },
+    {
+      id: 'forumPosts',
+      label: 'Diskusi',
+      icon: MessageSquare,
+      count: forumPosts.length,
+      content: (
+        <ForumPostsPanel data={forumPostsData} isLoading={forumPostsLoading} />
+      ),
+    },
+  ];
 
-  if (isLoading) {
+  if (isLoadingMaterial) {
     return (
-      <div className="p-8 text-center text-gray-600">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-gray-600">
         Memuat detail materi...
       </div>
     );
@@ -267,83 +374,108 @@ const MaterialDetailPage = () => {
 
   return (
     <>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
+      <div className="min-h-screen bg-gray-50">
+        <header className="border-b border-gray-200 bg-white">
+          <div className="container mx-auto px-4 py-8">
             <Link
               to={`${basePath}/courses/${courseId}/materials`}
-              className="text-sm font-semibold text-indigo-600 hover:underline mb-2 inline-block"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900"
             >
-              &larr; Kembali ke Daftar Materi
+              <ChevronLeft className="h-4 w-4" />
+              Daftar materi
             </Link>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Detail Materi:{' '}
-              <span className="font-normal">
-                {materialDetail?.data?.title || '...'}
-              </span>
-            </h1>
+            <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+                  Detail aktivitas materi
+                </p>
+                <h1 className="mt-2 text-3xl font-bold text-gray-900">
+                  {material?.title || 'Materi'}
+                </h1>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">
+                  Pantau tugas, hasil tes, dan diskusi siswa untuk materi ini.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setForumOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Buka forum
+              </button>
+            </div>
           </div>
-          {materialDetail && (
-            <button
-              onClick={() => setForumOpen(true)}
-              className="group inline-flex items-center gap-2 bg-primary text-white font-semibold px-4 py-2 rounded-lg hover:bg-opacity-90 transition-all duration-200 mt-4 sm:mt-0"
-            >
-              <MessageSquare size={18} />
-              Buka Forum Diskusi
-            </button>
-          )}
-        </div>
+        </header>
 
-        {/* Content Section */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-md">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-6 px-4">
-              <button
-                onClick={() => setActiveTab('submissions')}
-                className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
-                  activeTab === 'submissions'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:border-gray-300'
-                }`}
-              >
-                <FileText size={16} /> Tugas Terkumpul
-              </button>
-              <button
-                onClick={() => setActiveTab('testResults')}
-                className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
-                  activeTab === 'testResults'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:border-gray-300'
-                }`}
-              >
-                <CheckSquare size={16} /> Hasil Tes
-              </button>
-              <button
-                onClick={() => setActiveTab('forumPosts')}
-                className={`py-3 px-1 border-b-2 font-medium inline-flex items-center gap-2 ${
-                  activeTab === 'forumPosts'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:border-gray-300'
-                }`}
-              >
-                <MessageSquare size={16} /> Riwayat Diskusi
-              </button>
-            </nav>
+        <main className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              icon={Users}
+              label="Submission"
+              value={submissions.length}
+              detail={`${gradedCount} sudah dinilai`}
+            />
+            <StatCard
+              icon={CheckSquare}
+              label="Rata-rata tes"
+              value={testResults.length > 0 ? averageScore : '-'}
+              detail={`${testResults.length} hasil tes masuk`}
+            />
+            <StatCard
+              icon={MessageSquare}
+              label="Diskusi"
+              value={forumPosts.length}
+              detail="Posting utama pada materi"
+            />
+            <StatCard
+              icon={FileText}
+              label="Status materi"
+              value={material?.hasTest ? 'Quiz aktif' : 'Tanpa quiz'}
+              detail={material?.assignmentInstructions ? 'Tugas aktif' : 'Cek instruksi tugas'}
+            />
           </div>
 
-          {/* Tab Content */}
-          <div className="min-h-[300px] pt-4">{TABS[activeTab]}</div>
-        </div>
+          <section className="mt-6">
+            <div className="border-b border-gray-200">
+              <nav className="flex flex-wrap gap-2">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`inline-flex items-center gap-2 rounded-t-md border px-4 py-2 text-sm font-semibold transition ${
+                        isActive
+                          ? 'border-gray-200 border-b-white bg-white text-gray-900'
+                          : 'border-transparent text-gray-600 hover:bg-white'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {tab.label}
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                        {tab.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+            <div className="pt-5">
+              {tabs.find((tab) => tab.id === activeTab)?.content}
+            </div>
+          </section>
+        </main>
       </div>
 
-      {materialDetail && (
+      {material && (
         <ForumModal
           isOpen={isForumOpen}
           onClose={() => setForumOpen(false)}
           courseId={courseId}
-          material={materialDetail?.data}
+          material={material}
         />
       )}
     </>
