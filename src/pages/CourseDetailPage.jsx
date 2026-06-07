@@ -23,7 +23,7 @@ const CourseDetailPage = () => {
   const { courseSlug } = useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError } = useCourseDetail(courseSlug);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { openModal } = useModalStore();
   const { mutate: enroll, isPending: isEnrolling } = useEnrollInCourse();
 
@@ -52,8 +52,13 @@ const CourseDetailPage = () => {
 
   const { course, materials = [], enrollment } = data;
   const isEnrolled = !!enrollment;
+  const isLearner = user?.role === 'student';
+  const isStaff = ['admin', 'instructor'].includes(user?.role);
   const previewMaterials = isAuthenticated ? materials : materials.slice(0, 4);
   const courseUrl = `/learn/${course.slug || course._id}`;
+  const workspaceUrl = `/${
+    user?.role === 'admin' ? 'admin' : 'instructor'
+  }/courses/${course.slug || course._id}/materials`;
   const descriptionPreview = stripHtml(course.description).slice(0, 220);
 
   const handlePrimaryAction = () => {
@@ -64,6 +69,11 @@ const CourseDetailPage = () => {
 
     if (isEnrolled) {
       navigate(courseUrl);
+      return;
+    }
+
+    if (isStaff) {
+      navigate(workspaceUrl);
       return;
     }
 
@@ -124,9 +134,11 @@ const CourseDetailPage = () => {
                 ? 'Mendaftarkan...'
                 : isEnrolled
                   ? 'Lanjut belajar'
-                  : isAuthenticated
-                    ? 'Enroll gratis'
-                    : 'Login untuk enroll'}
+                  : isStaff
+                    ? 'Kelola kursus'
+                    : isLearner
+                      ? 'Enroll gratis'
+                      : 'Login untuk enroll'}
               <ArrowRight className="h-4 w-4" />
             </button>
             <div className="mt-5 space-y-3 text-sm text-gray-700">
