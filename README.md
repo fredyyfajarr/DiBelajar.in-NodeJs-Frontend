@@ -1,4 +1,4 @@
-﻿# DiBelajar.in Frontend
+# DiBelajar.in Frontend
 
 The frontend web application for the DiBelajar.in Learning Management System (LMS).
 
@@ -16,4 +16,5 @@ The frontend web application for the DiBelajar.in Learning Management System (LM
 - Framer Motion
 - Socket.io Client
 
-Copyright build dari nama saya Fredy Fajar Adi Putra
+Copyright &copy; 2026 Fredy Fajar Adi Putra. All Rights Reserved.
+
